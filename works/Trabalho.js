@@ -34,15 +34,10 @@ for(let i = 0; i< 3; i++){
 
 
 function moverPlanos() {
-    console.log(planos[0].position.y + 'y');
-    console.log(planos[0].position.x+'x');
-    console.log(planos[0].position.z+'z');
     planos.forEach(item => {
         item.translateY(-0.5);
         item.updateMatrixWorld(true);
-        
         if(item.position.z == 50) {
-            console.log("entrou no if");
             item.position.set(0,0,-250);
         }
     });
