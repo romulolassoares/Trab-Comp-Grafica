@@ -18,16 +18,17 @@ var stats = new Stats(); //Pra ver os status do FPS
 initDefaultBasicLight(scene);
 
 //Criando a camera
-var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/ window.innerHeight, 1, 500 );
-camera.position.set(-2, 50, 50);
-camera.lookAt(0, 5, 0);
+// var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/ window.innerHeight, 1, 500 );
+var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/ window.innerHeight, 1, 300 );
+camera.position.set(0, 100, 70);
+camera.lookAt(0, 15, 0);
 scene.add( camera );
 
 //Criando os planos
 var planos = [];
 
 for(let i = 0; i< 3; i++){
-    planos[i] = createGroundPlaneWired(400, 200);
+    planos[i] = createGroundPlaneWired(800, 200);
     planos[i].position.set(0,0,i*-100);
     scene.add(planos[i]);
 }
@@ -93,6 +94,54 @@ function deleteBullets() {
     });
 }
  
+//********************************************//
+// Criando Adversários
+var adversarios = [];
+var cubeGeometry = new THREE.BoxGeometry(6, 6, 6);
+var cubeMaterial = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
+
+function chamaAdversario(){
+    var chance = Math.floor(Math.random()*1000) + 1;
+    if(chance <=5){
+        criarAdversario();
+    }
+}
+
+var box = new THREE.Box3();
+
+function criarAdversario(){
+    let enemy = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    // position the cube
+    enemy.geometry.computeBoundingBox();
+    enemy.position.set(0.0, 4.0, -200.0);
+    // add the enemy to the scene
+    scene.add(enemy);
+
+    adversarios.push(enemy);
+}
+
+function movimentarAdversario(){
+    var movimento = Math.floor(Math.random()*3);
+    console.log(movimento);
+    switch(movimento){
+        case 0: vertical();
+        case 1: vertical();
+        case 2: vertical();
+        default: ;
+    }
+    
+}
+
+function vertical(){
+    adversarios.forEach(item => {
+        item.updateMatrixWorld(true);
+        if(item.position.z <= -50){
+            item.translateZ(1);
+        }
+    })
+}
+//********************************************//
+
 //Função para usar as teclas
 function keyboardUpdate() {
 
@@ -102,11 +151,24 @@ function keyboardUpdate() {
     var moveDistance = speed * clock.getDelta();
 
     // Keyboard.pressed - execute while is pressed
-    if (keyboard.pressed("down")) planeHolder.translateZ(moveDistance);
-    if (keyboard.pressed("up")) planeHolder.translateZ(-moveDistance);
-    if (keyboard.pressed("right")) planeHolder.translateX(moveDistance);
-    if (keyboard.pressed("left")) planeHolder.translateX(-moveDistance);
-
+    cone.getWorldPosition(target);
+    if (keyboard.pressed("down")){
+        if(target.z <= 28)
+            planeHolder.translateZ(moveDistance);
+    } 
+    if (keyboard.pressed("up")) {
+        if(target.z >= -100)
+            planeHolder.translateZ(-moveDistance);
+    }
+    if (keyboard.pressed("right")){
+        console.log(window.innerHeight);
+        if(target.x <= 75)
+        planeHolder.translateX(moveDistance); 
+    } 
+    if (keyboard.pressed("left")) {
+        if(target.x >= -70)
+        planeHolder.translateX(-moveDistance);
+    }
     // Keyboard.down - execute only once per key pressed
     // if (keyboard.down("ctrl")) atirar();
     // if (keyboard.down("space")) atirar();
@@ -121,10 +183,11 @@ document.getElementById("webgl-output").appendChild(stats.domElement);//Pra most
 function render() {
     stats.update();
     keyboardUpdate();
-    // tiroAndar();
     moveBullets();
     deleteBullets();
     moverPlanos();
+    chamaAdversario();
+    movimentarAdversario();
     requestAnimationFrame(render);
     renderer.render(scene, camera) // Render scene
 }
