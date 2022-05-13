@@ -28,9 +28,26 @@ var planos = [];
 
 for(let i = 0; i< 3; i++){
     planos[i] = createGroundPlaneWired(400, 200);
-    planos[i].position.set(0,0,i*-50);
+    planos[i].position.set(0,0,i*-100);
     scene.add(planos[i]);
 }
+
+
+function moverPlanos() {
+    console.log(planos[0].position.y + 'y');
+    console.log(planos[0].position.x+'x');
+    console.log(planos[0].position.z+'z');
+    planos.forEach(item => {
+        item.translateY(-0.5);
+        item.updateMatrixWorld(true);
+        
+        if(item.position.z == 50) {
+            console.log("entrou no if");
+            item.position.set(0,0,-250);
+        }
+    });
+}
+
 
 //Para usar o Keyboard
 var keyboard = new KeyboardState();
@@ -74,35 +91,13 @@ function moveBullets() {
 function deleteBullets() {
     bullets.forEach(item => {
         item.updateMatrixWorld(true);
-        if(item.position.z == -250) {
+        if(item.position.z == -120) {
             console.log(item + " passou do limite");
             scene.remove(item);
         }
     });
 }
-
-// //Função pro tiro movimentar
-// function tiroAndar(){ 
-//     var speed = 1000;
-//     var moveDistance = speed * clock.getDelta();
-//     var tiro2 = new THREE.Object3D()
-//     tiro2.copy(tiro);
-//     tiro2.translateZ(-1);
-// } 
-// //Função que cria o tiro e chama a função para movimenta-lo
-// var tiro = new THREE.Mesh(espgeometry,espmaterial);
-// var tiroholder = new THREE.Object3D();
-
-// function atirar(){
-//     cone.getWorldPosition(target);
-//     tiro.position.set(target.x,target.y,target.z);
-
-//     tiroholder.add(tiro)
-//     scene.add(tiroholder);
-//     tiroAndar();
-//     //scene.remove(tiro);
-// } 
-
+ 
 //Função para usar as teclas
 function keyboardUpdate() {
 
@@ -121,7 +116,7 @@ function keyboardUpdate() {
     // if (keyboard.down("ctrl")) atirar();
     // if (keyboard.down("space")) atirar();
     if (keyboard.down("ctrl")) createShoot();
-    if (keyboard.pressed("space")) createShoot();
+    if (keyboard.down("space")) createShoot();
 }
 
 render();
@@ -134,6 +129,7 @@ function render() {
     // tiroAndar();
     moveBullets();
     deleteBullets();
+    moverPlanos();
     requestAnimationFrame(render);
     renderer.render(scene, camera) // Render scene
 }
