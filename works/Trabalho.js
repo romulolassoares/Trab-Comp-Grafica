@@ -18,9 +18,10 @@ var stats = new Stats(); //Pra ver os status do FPS
 initDefaultBasicLight(scene);
 
 //Criando a camera
-var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/ window.innerHeight, 1, 500 );
-camera.position.set(-2, 50, 50);
-camera.lookAt(0, 5, 0);
+// var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/ window.innerHeight, 1, 500 );
+var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/ window.innerHeight, 1, 300 );
+camera.position.set(0, 100, 70);
+camera.lookAt(0, 15, 0);
 scene.add( camera );
 
 //Criando os planos
