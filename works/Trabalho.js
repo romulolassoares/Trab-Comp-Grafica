@@ -13,6 +13,7 @@ import {
 var scene = new THREE.Scene();    // Create main scene
 var renderer = initRenderer();
 var clock = new THREE.Clock();
+clock.start();
 var stats = new Stats(); //Pra ver os status do FPS
 initDefaultBasicLight(scene);
 
@@ -51,26 +52,56 @@ const espgeometry = new THREE.SphereGeometry(0.5, 20, 50);
 const espmaterial = new THREE.MeshLambertMaterial({color:"rgb(255, 165, 0)"});
 var target = new THREE.Vector3();
 
-//Função pro tiro movimentar
-function tiroAndar(){ 
-    var speed = 40;
-    var moveDistance = speed * clock.getDelta();
-    tiroholder.translateZ(-moveDistance);
+var bullets = []; // Vetor de todas as balas
 
-} 
-//Função que cria o tiro e chama a função para movimenta-lo
-var tiro = new THREE.Mesh(espgeometry,espmaterial);
-var tiroholder = new THREE.Object3D();
-
-function atirar(){
+// Função para criar um tiro
+function createShoot() {
+    let shoot = new THREE.Mesh(espgeometry, espmaterial);
     cone.getWorldPosition(target);
-    tiro.position.set(target.x,target.y,target.z);
+    shoot.position.set(target.x,target.y,target.z);
+    scene.add(shoot);
+    bullets.push(shoot);
+}
 
-    tiroholder.add(tiro)
-    scene.add(tiroholder);
-    tiroAndar();
-    //scene.remove(tiro);
-} 
+// Função para mover os tiros para frente
+function moveBullets() {
+    bullets.forEach(item => {
+        item.translateZ(-1);
+    });
+}
+
+// Função para deletar os tiros a partir de uma posição
+function deleteBullets() {
+    bullets.forEach(item => {
+        item.updateMatrixWorld(true);
+        if(item.position.z == -250) {
+            console.log(item + " passou do limite");
+            scene.remove(item);
+        }
+    });
+}
+
+// //Função pro tiro movimentar
+// function tiroAndar(){ 
+//     var speed = 1000;
+//     var moveDistance = speed * clock.getDelta();
+//     var tiro2 = new THREE.Object3D()
+//     tiro2.copy(tiro);
+//     tiro2.translateZ(-1);
+// } 
+// //Função que cria o tiro e chama a função para movimenta-lo
+// var tiro = new THREE.Mesh(espgeometry,espmaterial);
+// var tiroholder = new THREE.Object3D();
+
+// function atirar(){
+//     cone.getWorldPosition(target);
+//     tiro.position.set(target.x,target.y,target.z);
+
+//     tiroholder.add(tiro)
+//     scene.add(tiroholder);
+//     tiroAndar();
+//     //scene.remove(tiro);
+// } 
 
 //Função para usar as teclas
 function keyboardUpdate() {
@@ -87,8 +118,10 @@ function keyboardUpdate() {
     if (keyboard.pressed("left")) planeHolder.translateX(-moveDistance);
 
     // Keyboard.down - execute only once per key pressed
-    if (keyboard.down("ctrl")) atirar();
-    if (keyboard.down("space")) atirar();
+    // if (keyboard.down("ctrl")) atirar();
+    // if (keyboard.down("space")) atirar();
+    if (keyboard.down("ctrl")) createShoot();
+    if (keyboard.pressed("space")) createShoot();
 }
 
 render();
@@ -98,7 +131,9 @@ document.getElementById("webgl-output").appendChild(stats.domElement);//Pra most
 function render() {
     stats.update();
     keyboardUpdate();
-    tiroAndar();
+    // tiroAndar();
+    moveBullets();
+    deleteBullets();
     requestAnimationFrame(render);
     renderer.render(scene, camera) // Render scene
 }
