@@ -18,31 +18,32 @@ var stats = new Stats(); //Pra ver os status do FPS
 initDefaultBasicLight(scene);
 
 //Criando a camera
-var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/ window.innerHeight, 1, 500 );
-camera.position.set(-2, 50, 50);
-camera.lookAt(0, 5, 0);
+// var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/ window.innerHeight, 1, 500 );
+var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/ window.innerHeight, 1, 300 );
+camera.position.set(0, 100, 70);
+camera.lookAt(0, 15, 0);
 scene.add( camera );
 
 //Criando os planos
 var planos = [];
 
 for(let i = 0; i< 3; i++){
-    planos[i] = createGroundPlaneWired(400, 200);
+    planos[i] = createGroundPlaneWired(800, 200);
     planos[i].position.set(0,0,i*-100);
     scene.add(planos[i]);
 }
 
 
 function moverPlanos() {
-    console.log(planos[0].position.y + 'y');
-    console.log(planos[0].position.x+'x');
-    console.log(planos[0].position.z+'z');
+    // console.log(planos[0].position.y + 'y');
+    // console.log(planos[0].position.x+'x');
+    // console.log(planos[0].position.z+'z');
     planos.forEach(item => {
         item.translateY(-0.5);
         item.updateMatrixWorld(true);
         
         if(item.position.z == 50) {
-            console.log("entrou no if");
+            // console.log("entrou no if");
             item.position.set(0,0,-250);
         }
     });
