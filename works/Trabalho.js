@@ -23,6 +23,7 @@ var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/ window.innerHei
 camera.position.set(0, 100, 70);
 camera.lookAt(0, 15, 0);
 scene.add( camera );
+// var box = new THREE.Box3(enemy.geometry.boundingBox.min,enemy.geometry.boundingBox.max);
 
 //Criando os planos
 var planos = [];
@@ -73,6 +74,8 @@ function createShoot() {
     cone.getWorldPosition(target);
     shoot.position.set(target.x,target.y,target.z);
     scene.add(shoot);
+    shoot.geometry.computeBoundingBox();
+    // var box = new THREE.Box3(shoot.geometry.boundingBox.min,shoot.geometry.boundingBox.max);
     bullets.push(shoot);
 }
 
@@ -107,13 +110,24 @@ function chamaAdversario(){
     }
 }
 
-var box = new THREE.Box3();
 
 function criarAdversario(){
     let enemy = new THREE.Mesh(cubeGeometry, cubeMaterial);
     // position the cube
-    enemy.geometry.computeBoundingBox();
-    enemy.position.set(0.0, 4.0, -200.0);
+    const newpos = Math.floor(Math.random()*75) + 1;
+    if(newpos > 70)
+    enemy.position.set(newpos,4,-200);
+    else{
+        const chance = Math.floor(Math.random()*2) + 1;
+        if(chance == 1)
+        enemy.position.set(newpos,4,-200);
+        else
+        enemy.position.set(-newpos,4,-200);
+    }
+    
+    // enemy.geometry.computeBoundingBox();
+    //box.copy(enemy.geometry.computeBoundingBox).applyMatrix4(enemy.matrixWorld);
+
     // add the enemy to the scene
     scene.add(enemy);
 
@@ -122,7 +136,6 @@ function criarAdversario(){
 
 function movimentarAdversario(){
     var movimento = Math.floor(Math.random()*3);
-    console.log(movimento);
     switch(movimento){
         case 0: vertical();
         case 1: vertical();
@@ -135,8 +148,8 @@ function movimentarAdversario(){
 function vertical(){
     adversarios.forEach(item => {
         item.updateMatrixWorld(true);
-        if(item.position.z <= -50){
-            item.translateZ(1);
+        if(item.position.z <= 30){
+            item.translateZ(0.2);
         }
     })
 }
