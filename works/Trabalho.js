@@ -73,6 +73,7 @@ function createShoot() {
     let shoot = new THREE.Mesh(espgeometry, espmaterial);
     cone.getWorldPosition(target);
     shoot.position.set(target.x,target.y,target.z);
+    shoot.geometry.computeBoundingBox();
     scene.add(shoot);
     shoot.geometry.computeBoundingBox();
     // var box = new THREE.Box3(shoot.geometry.boundingBox.min,shoot.geometry.boundingBox.max);
@@ -81,8 +82,10 @@ function createShoot() {
 
 // Função para mover os tiros para frente
 function moveBullets() {
+    
     bullets.forEach(item => {
         item.translateZ(-1);
+        
     });
 }
 
@@ -90,9 +93,11 @@ function moveBullets() {
 function deleteBullets() {
     bullets.forEach(item => {
         item.updateMatrixWorld(true);
-        if(item.position.z == -120) {
-            console.log(item + " passou do limite");
+        if(item.position.z == -220) {
+            // console.log(item + " passou do limite");
             scene.remove(item);
+            let id = bullets.indexOf(item);
+            bullets.splice(id, 1);
         }
     });
 }
@@ -101,6 +106,7 @@ function deleteBullets() {
 // Criando Adversários
 var adversarios = [];
 var cubeGeometry = new THREE.BoxGeometry(6, 6, 6);
+// cubeGeometry.computeBoundingBox();
 var cubeMaterial = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
 
 function chamaAdversario(){
@@ -109,7 +115,6 @@ function chamaAdversario(){
         criarAdversario();
     }
 }
-
 
 function criarAdversario(){
     let enemy = new THREE.Mesh(cubeGeometry, cubeMaterial);
@@ -125,7 +130,7 @@ function criarAdversario(){
         enemy.position.set(-newpos,4,-200);
     }
     
-    // enemy.geometry.computeBoundingBox();
+    enemy.geometry.computeBoundingBox();
     //box.copy(enemy.geometry.computeBoundingBox).applyMatrix4(enemy.matrixWorld);
 
     // add the enemy to the scene
@@ -155,6 +160,34 @@ function vertical(){
 }
 //********************************************//
 
+/**
+ * Colisão entre tiro e inimigo
+ */
+const box = new THREE.Box3();
+const box2 = new THREE.Box3();
+var enemyBox;
+var bulletBox;
+/**
+ * Função para validar se ocorreu colisão entre os tiros e os inimigos.
+ * Caso ocorra uma colisão o tiro e o inimigo são removidos da tela.
+ */
+function colision() {
+    adversarios.forEach(enemy => {
+        enemyBox = box.copy( enemy.geometry.boundingBox ).applyMatrix4( enemy.matrixWorld )
+        bullets.forEach(shoot => {
+            bulletBox = box2.copy( shoot.geometry.boundingBox ).applyMatrix4( shoot.matrixWorld )
+            if(enemyBox.containsBox(bulletBox)) {
+                scene.remove(enemy);
+                scene.remove(shoot);
+                let id = bullets.indexOf(shoot);
+                bullets.splice(id, 1);
+                let id2 = adversarios.indexOf(enemy);
+                adversarios.splice(id2, 1);
+            }
+        });
+    });
+}
+
 //Função para usar as teclas
 function keyboardUpdate() {
 
@@ -174,7 +207,7 @@ function keyboardUpdate() {
             planeHolder.translateZ(-moveDistance);
     }
     if (keyboard.pressed("right")){
-        console.log(window.innerHeight);
+        // console.log(window.innerHeight);
         if(target.x <= 75)
         planeHolder.translateX(moveDistance); 
     } 
@@ -201,6 +234,7 @@ function render() {
     moverPlanos();
     chamaAdversario();
     movimentarAdversario();
+    colision();
     requestAnimationFrame(render);
     renderer.render(scene, camera) // Render scene
 }
