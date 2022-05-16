@@ -90,7 +90,7 @@ function moveBullets() {
 function deleteBullets() {
     bullets.forEach(item => {
         item.updateMatrixWorld(true);
-        if(item.position.z == -120) {
+        if(item.position.z == -185) {
             console.log(item + " passou do limite");
             scene.remove(item);
         }
@@ -104,7 +104,7 @@ var cubeGeometry = new THREE.BoxGeometry(6, 6, 6);
 var cubeMaterial = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
 
 function chamaAdversario(){
-    var chance = Math.floor(Math.random()*1000) + 1;
+    var chance = Math.floor(Math.random()*100) + 1;
     if(chance <=5){
         criarAdversario();
     }
