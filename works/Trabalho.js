@@ -56,6 +56,7 @@ var cone = new THREE.Mesh( geometry, material );
 cone.position.set(0,4,0);
 cone.rotateX(-1.6);
 
+cone.geometry.computeBoundingBox();
 //Criando o que vai movimentar o avião
 var planeHolder = new THREE.Object3D();
 planeHolder.add(cone);
@@ -73,10 +74,9 @@ function createShoot() {
     let shoot = new THREE.Mesh(espgeometry, espmaterial);
     cone.getWorldPosition(target);
     shoot.position.set(target.x,target.y,target.z);
-    shoot.geometry.computeBoundingBox();
+    // shoot.geometry.computeBoundingBox();
     scene.add(shoot);
     shoot.geometry.computeBoundingBox();
-    // var box = new THREE.Box3(shoot.geometry.boundingBox.min,shoot.geometry.boundingBox.max);
     bullets.push(shoot);
 }
 
@@ -110,7 +110,7 @@ var cubeGeometry = new THREE.BoxGeometry(6, 6, 6);
 var cubeMaterial = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
 
 function chamaAdversario(){
-    var chance = Math.floor(Math.random()*1000) + 1;
+    var chance = Math.floor(Math.random()*100) + 1;
     if(chance <=5){
         criarAdversario();
     }
@@ -140,11 +140,9 @@ function criarAdversario(){
 }
 
 function movimentarAdversario(){
-    var movimento = Math.floor(Math.random()*3);
+    var movimento = Math.floor(Math.random()*1);
     switch(movimento){
         case 0: vertical();
-        case 1: vertical();
-        case 2: vertical();
         default: ;
     }
     
@@ -165,12 +163,26 @@ function vertical(){
  */
 const box = new THREE.Box3();
 const box2 = new THREE.Box3();
+const box3 = new THREE.Box3();
 var enemyBox;
 var bulletBox;
+var aviaoBox;
 /**
  * Função para validar se ocorreu colisão entre os tiros e os inimigos.
  * Caso ocorra uma colisão o tiro e o inimigo são removidos da tela.
  */
+function colisionPlane(){
+    adversarios.forEach(enemy => {
+        enemyBox = box.copy( enemy.geometry.boundingBox ).applyMatrix4( enemy.matrixWorld )
+        aviaoBox = box3.copy(cone.geometry.boundingBox).applyMatrix4(cone.matrixWorld);
+        if(enemyBox.containsBox(aviaoBox) || enemyBox.intersectsBox(aviaoBox)) {
+            scene.remove(enemy);
+            planeHolder.position.set(0,4,0);
+            let id2 = adversarios.indexOf(enemy);
+            adversarios.splice(id2, 1);
+        }
+    });
+}
 function colision() {
     adversarios.forEach(enemy => {
         enemyBox = box.copy( enemy.geometry.boundingBox ).applyMatrix4( enemy.matrixWorld )
@@ -235,6 +247,7 @@ function render() {
     chamaAdversario();
     movimentarAdversario();
     colision();
+    colisionPlane();
     requestAnimationFrame(render);
     renderer.render(scene, camera) // Render scene
 }
