@@ -104,13 +104,15 @@ function deleteBullets() {
  
 //********************************************//
 // Criando Adversários
+
 var adversarios = [];
+var velocidades = [];
 var cubeGeometry = new THREE.BoxGeometry(10, 10, 10);
 // cubeGeometry.computeBoundingBox();
 var cubeMaterial = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
 
 function chamaAdversario(){
-    var chance = Math.floor(Math.random()*950) + 1;
+    var chance = Math.floor(Math.random()*100) + 1;
     if(chance <=5){
         criarAdversario();
     }
@@ -119,20 +121,18 @@ function chamaAdversario(){
 function criarAdversario(){
     let enemy = new THREE.Mesh(cubeGeometry, cubeMaterial);
     // position the cube
-    const newpos = Math.floor(Math.random()*75) + 1;
-    if(newpos > 70)
-    enemy.position.set(newpos,6,-200);
-    else{
-        const chance = Math.floor(Math.random()*2) + 1;
-        if(chance == 1)
-        enemy.position.set(newpos,6,-200);
-        else
-        enemy.position.set(-newpos,6,-200);
-    }
+    const newpos = Math.floor(Math.random()*95) + 1;
+    const chance = Math.floor(Math.random()*2) + 1;
+    if(chance == 1)
+    enemy.position.set(newpos,10,-200);
+    else
+    enemy.position.set(-newpos,10,-200);
     
     enemy.geometry.computeBoundingBox();
     //box.copy(enemy.geometry.computeBoundingBox).applyMatrix4(enemy.matrixWorld);
-
+    const velocidade = Math.floor(Math.random()*5) + 1;
+    velocidades.push(velocidade);
+    
     // add the enemy to the scene
     scene.add(enemy);
 
@@ -155,10 +155,12 @@ function vertical(){
             scene.remove(item);
             let id = adversarios.indexOf(item);
             adversarios.splice(id, 1);
-            console.log("Adversário apagado");
+            velocidades.splice(id, 1);
         }
         if(item.position.z < 70){
-            item.translateZ(0.2);
+            let id = adversarios.indexOf(item);
+            var v = velocidades.at(id);
+            item.translateZ(0.2*v);
         }
     })
 }
@@ -173,6 +175,7 @@ const box3 = new THREE.Box3();
 var enemyBox;
 var bulletBox;
 var aviaoBox;
+var verify = false
 /**
  * Função para validar se ocorreu colisão entre os tiros e os inimigos.
  * Caso ocorra uma colisão o tiro e o inimigo são removidos da tela.
@@ -195,12 +198,13 @@ function colision() {
         bullets.forEach(shoot => {
             bulletBox = box2.copy( shoot.geometry.boundingBox ).applyMatrix4( shoot.matrixWorld )
             if(enemyBox.containsBox(bulletBox) || enemyBox.intersectsBox(bulletBox)) {
+                let id2 = adversarios.indexOf(enemy);
                 scene.remove(enemy);
                 scene.remove(shoot);
                 let id = bullets.indexOf(shoot);
                 bullets.splice(id, 1);
-                let id2 = adversarios.indexOf(enemy);
                 adversarios.splice(id2, 1);
+                velocidades.splice(id2, 1);
             }
         });
     });
@@ -217,7 +221,7 @@ function keyboardUpdate() {
     // Keyboard.pressed - execute while is pressed
     cone.getWorldPosition(target);
     if (keyboard.pressed("down")){
-        if(target.z <= 28)
+        if(target.z <= 45)
             planeHolder.translateZ(moveDistance);
     } 
     if (keyboard.pressed("up")) {
@@ -226,16 +230,17 @@ function keyboardUpdate() {
     }
     if (keyboard.pressed("right")){
         // console.log(window.innerHeight);
-        if(target.x <= 75)
+        if(target.x <= 95)
         planeHolder.translateX(moveDistance); 
     } 
     if (keyboard.pressed("left")) {
-        if(target.x >= -70)
+        if(target.x >= -95)
         planeHolder.translateX(-moveDistance);
     }
     if (keyboard.down("ctrl")) createShoot();
     if (keyboard.down("space")) createShoot();
 }
+
 
 render();
 
