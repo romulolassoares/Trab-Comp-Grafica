@@ -50,10 +50,10 @@ function moverPlanos() {
 var keyboard = new KeyboardState();
 
 //Criando o avião
-const geometry = new THREE.ConeGeometry( 3, 10, 64 );
+const geometry = new THREE.ConeGeometry( 5, 15, 64 );
 const material = new THREE.MeshLambertMaterial( {color:'rgb(180,180,255)'} );
 var cone = new THREE.Mesh( geometry, material );
-cone.position.set(0,4,0);
+cone.position.set(0,6,0);
 cone.rotateX(-1.6);
 
 cone.geometry.computeBoundingBox();
@@ -105,12 +105,12 @@ function deleteBullets() {
 //********************************************//
 // Criando Adversários
 var adversarios = [];
-var cubeGeometry = new THREE.BoxGeometry(6, 6, 6);
+var cubeGeometry = new THREE.BoxGeometry(10, 10, 10);
 // cubeGeometry.computeBoundingBox();
 var cubeMaterial = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
 
 function chamaAdversario(){
-    var chance = Math.floor(Math.random()*100) + 1;
+    var chance = Math.floor(Math.random()*950) + 1;
     if(chance <=5){
         criarAdversario();
     }
@@ -121,13 +121,13 @@ function criarAdversario(){
     // position the cube
     const newpos = Math.floor(Math.random()*75) + 1;
     if(newpos > 70)
-    enemy.position.set(newpos,4,-200);
+    enemy.position.set(newpos,6,-200);
     else{
         const chance = Math.floor(Math.random()*2) + 1;
         if(chance == 1)
-        enemy.position.set(newpos,4,-200);
+        enemy.position.set(newpos,6,-200);
         else
-        enemy.position.set(-newpos,4,-200);
+        enemy.position.set(-newpos,6,-200);
     }
     
     enemy.geometry.computeBoundingBox();
@@ -151,7 +151,13 @@ function movimentarAdversario(){
 function vertical(){
     adversarios.forEach(item => {
         item.updateMatrixWorld(true);
-        if(item.position.z <= -30){
+        if(item.position.z >= 70){
+            scene.remove(item);
+            let id = adversarios.indexOf(item);
+            adversarios.splice(id, 1);
+            console.log("Adversário apagado");
+        }
+        if(item.position.z < 70){
             item.translateZ(0.2);
         }
     })
@@ -227,9 +233,6 @@ function keyboardUpdate() {
         if(target.x >= -70)
         planeHolder.translateX(-moveDistance);
     }
-    // Keyboard.down - execute only once per key pressed
-    // if (keyboard.down("ctrl")) atirar();
-    // if (keyboard.down("space")) atirar();
     if (keyboard.down("ctrl")) createShoot();
     if (keyboard.down("space")) createShoot();
 }
