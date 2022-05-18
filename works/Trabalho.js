@@ -192,12 +192,15 @@ function colisionPlane(){
         }
     });
 }
+var aux = new THREE.Mesh();
 function colision() {
     adversarios.forEach(enemy => {
         enemyBox = box.copy( enemy.geometry.boundingBox ).applyMatrix4( enemy.matrixWorld )
         bullets.forEach(shoot => {
             bulletBox = box2.copy( shoot.geometry.boundingBox ).applyMatrix4( shoot.matrixWorld )
             if(enemyBox.containsBox(bulletBox) || enemyBox.intersectsBox(bulletBox)) {
+                let x = aux.copy(enemy);
+                enemiesAnimation.push(x);
                 let id2 = adversarios.indexOf(enemy);
                 scene.remove(enemy);
                 scene.remove(shoot);
@@ -208,6 +211,20 @@ function colision() {
             }
         });
     });
+}
+
+/**
+ * Para efetuar a animação dos inimigos
+ */
+var enemiesAnimation = [];
+
+function animation() {
+    enemiesAnimation.forEach(item => {
+        scene.add(item);
+        item.rotation.y += 0.1;
+        item.rotation.x += 0.1;
+        // item.material.color.setHex( 0xffffff )
+    })
 }
 
 //Função para usar as teclas
@@ -256,6 +273,7 @@ function render() {
     movimentarAdversario();
     colision();
     colisionPlane();
+    animation();
     requestAnimationFrame(render);
     renderer.render(scene, camera) // Render scene
 }
