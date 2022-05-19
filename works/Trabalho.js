@@ -3,10 +3,7 @@ import Stats from '../build/jsm/libs/stats.module.js';
 import KeyboardState from '../libs/util/KeyboardState.js'
 import {
     initRenderer,
-    initCamera,
     initDefaultBasicLight,
-    InfoBox,
-    onWindowResize,
     createGroundPlaneWired
 } from "../libs/util/util.js";
 
@@ -17,14 +14,15 @@ clock.start();
 var stats = new Stats(); //Pra ver os status do FPS
 initDefaultBasicLight(scene);
 
+//********************************************//
 //Criando a camera
-// var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/ window.innerHeight, 1, 500 );
 var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/ window.innerHeight, 1, 300 );
 camera.position.set(0, 100, 70);
 camera.lookAt(0, 15, 0);
 scene.add( camera );
-// var box = new THREE.Box3(enemy.geometry.boundingBox.min,enemy.geometry.boundingBox.max);
+//********************************************//
 
+//********************************************//
 //Criando os planos
 var planos = [];
 
@@ -44,11 +42,12 @@ function moverPlanos() {
         }
     });
 }
-
+//********************************************//
 
 //Para usar o Keyboard
 var keyboard = new KeyboardState();
 
+//********************************************//
 //Criando o avião
 const geometry = new THREE.ConeGeometry( 5, 15, 64 );
 const material = new THREE.MeshLambertMaterial( {color:'rgb(180,180,255)'} );
@@ -57,11 +56,14 @@ cone.position.set(0,6,0);
 cone.rotateX(-1.6);
 
 cone.geometry.computeBoundingBox();
+
 //Criando o que vai movimentar o avião
 var planeHolder = new THREE.Object3D();
 planeHolder.add(cone);
 scene.add( planeHolder );
+//********************************************//
 
+//********************************************//
 //Criando os tiros
 const espgeometry = new THREE.SphereGeometry(1, 20, 50);
 const espmaterial = new THREE.MeshLambertMaterial({color:"rgb(255, 165, 0)"});
@@ -94,25 +96,25 @@ function deleteBullets() {
     bullets.forEach(item => {
         item.updateMatrixWorld(true);
         if(item.position.z == -185) {
-            console.log(item + " passou do limite");
             scene.remove(item);
             let id = bullets.indexOf(item);
             bullets.splice(id, 1);
         }
     });
 }
- 
+ //********************************************//
+
 //********************************************//
 // Criando Adversários
 
 var adversarios = [];
 var velocidades = [];
 var cubeGeometry = new THREE.BoxGeometry(10, 10, 10);
-// cubeGeometry.computeBoundingBox();
 var cubeMaterial = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
 
+// função para limitar quantos inimigos tem na tela
 function chamaAdversario(){
-    var chance = Math.floor(Math.random()*100) + 1;
+    var chance = Math.floor(Math.random()*900) + 1;
     if(chance <=5){
         criarAdversario();
     }
@@ -129,8 +131,7 @@ function criarAdversario(){
     enemy.position.set(-newpos,10,-200);
     
     enemy.geometry.computeBoundingBox();
-    //box.copy(enemy.geometry.computeBoundingBox).applyMatrix4(enemy.matrixWorld);
-    const velocidade = Math.floor(Math.random()*5) + 1;
+    const velocidade = Math.floor(Math.random()*5) + 2
     velocidades.push(velocidade);
     
     // add the enemy to the scene
@@ -139,6 +140,8 @@ function criarAdversario(){
     adversarios.push(enemy);
 }
 
+// a ideia é fazer adversário se movimentarem aleatoriamente 
+// sendo os tipo de movimento: vertical, horizontal, diagonal ...
 function movimentarAdversario(){
     var movimento = Math.floor(Math.random()*1);
     switch(movimento){
@@ -148,6 +151,7 @@ function movimentarAdversario(){
     
 }
 
+// Função para mover os inimigos na vertical
 function vertical(){
     adversarios.forEach(item => {
         item.updateMatrixWorld(true);
@@ -166,8 +170,9 @@ function vertical(){
 }
 //********************************************//
 
+//********************************************//
 /**
- * Colisão entre tiro e inimigo
+ * Colisão entre tiro e inimigo e animção
  */
 const box = new THREE.Box3();
 const box2 = new THREE.Box3();
@@ -192,7 +197,6 @@ function colisionPlane(){
             
             
             enemiesAnimation.push(x);
-            //planeHolder.position.set(0,4,0);
             let id2 = adversarios.indexOf(enemy);
             adversarios.splice(id2, 1);
         }
@@ -247,8 +251,6 @@ function excluirInimgo(id){
 }
 
 function animation() {
-    console.log(window.screen.height); //1080
-    console.log(window.screen.width); //2560
     enemiesAnimation.forEach(item => {
         scene.add(item);
         item.rotation.y += 0.1;
@@ -262,7 +264,9 @@ function animation() {
             excluirInimgo(enemiesAnimation.indexOf(item));
     })
 }
+//********************************************//
 
+//********************************************//
 //Função para usar as teclas
 function keyboardUpdate() {
 
@@ -278,11 +282,10 @@ function keyboardUpdate() {
             planeHolder.translateZ(moveDistance);
     } 
     if (keyboard.pressed("up")) {
-        if(target.z >= -100)
+        if(target.z >= -150)
             planeHolder.translateZ(-moveDistance);
     }
     if (keyboard.pressed("right")){
-        // console.log(window.innerHeight);
         if(target.x <= 95)
         planeHolder.translateX(moveDistance); 
     } 
@@ -293,7 +296,7 @@ function keyboardUpdate() {
     if (keyboard.down("ctrl")) createShoot();
     if (keyboard.down("space")) createShoot();
 }
-
+//********************************************//
 
 render();
 
