@@ -175,7 +175,7 @@ const box3 = new THREE.Box3();
 var enemyBox;
 var bulletBox;
 var aviaoBox;
-var verify = false
+var acertouaviao = false;
 /**
  * Função para validar se ocorreu colisão entre os tiros e os inimigos.
  * Caso ocorra uma colisão o tiro e o inimigo são removidos da tela.
@@ -186,7 +186,13 @@ function colisionPlane(){
         aviaoBox = box3.copy(cone.geometry.boundingBox).applyMatrix4(cone.matrixWorld);
         if(enemyBox.containsBox(aviaoBox) || enemyBox.intersectsBox(aviaoBox)) {
             scene.remove(enemy);
-            planeHolder.position.set(0,4,0);
+            let x = aux.copy(enemy);
+            acertouaviao = true;
+            removePlane();
+            
+            
+            enemiesAnimation.push(x);
+            //planeHolder.position.set(0,4,0);
             let id2 = adversarios.indexOf(enemy);
             adversarios.splice(id2, 1);
         }
@@ -218,12 +224,42 @@ function colision() {
  */
 var enemiesAnimation = [];
 
+function removePlane(){
+    if(cone.scale.x>=0){
+        cone.scale.x -=.1;
+        cone.scale.y -=.1;
+        cone.scale.z -=.1;
+    }
+    if(cone.scale.x <= 0){
+        acertouaviao = false;
+        planeHolder.position.set(0,6,0);
+        cone.scale.set(1,1,1);
+    }
+}
+
+function excluirInimgo(id){
+    enemiesAnimation.forEach(item => {
+        if(enemiesAnimation.indexOf(item) == id){
+            scene.remove(item);
+            enemiesAnimation.splice(id,1);
+        }
+    })
+}
+
 function animation() {
+    console.log(window.screen.height); //1080
+    console.log(window.screen.width); //2560
     enemiesAnimation.forEach(item => {
         scene.add(item);
         item.rotation.y += 0.1;
         item.rotation.x += 0.1;
-        // item.material.color.setHex( 0xffffff )
+        if(item.scale.x>=0){
+            item.scale.x -=.1;
+            item.scale.y -=.1;
+            item.scale.z -=.1;
+        }
+        if(item.scale.x <= 0)
+            excluirInimgo(enemiesAnimation.indexOf(item));
     })
 }
 
@@ -275,5 +311,7 @@ function render() {
     colisionPlane();
     animation();
     requestAnimationFrame(render);
+    if(acertouaviao)
+        removePlane();
     renderer.render(scene, camera) // Render scene
 }
