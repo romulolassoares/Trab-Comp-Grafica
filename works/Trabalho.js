@@ -32,7 +32,6 @@ for(let i = 0; i< 3; i++){
     scene.add(planos[i]);
 }
 
-
 function moverPlanos() {
     planos.forEach(item => {
         item.translateY(-0.5);
@@ -84,7 +83,6 @@ function createShoot() {
 
 // Função para mover os tiros para frente
 function moveBullets() {
-    
     bullets.forEach(item => {
         item.translateZ(-1);
         
@@ -106,7 +104,6 @@ function deleteBullets() {
 
 //********************************************//
 // Criando Adversários
-
 var adversarios = [];
 var velocidades = [];
 var cubeGeometry = new THREE.BoxGeometry(10, 10, 10);
@@ -115,7 +112,7 @@ var cubeMaterial = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
 // função para limitar quantos inimigos tem na tela
 function chamaAdversario(){
     var chance = Math.floor(Math.random()*900) + 1;
-    if(chance <=5){
+    if(chance <=10){
         criarAdversario();
     }
 }
@@ -126,17 +123,14 @@ function criarAdversario(){
     const newpos = Math.floor(Math.random()*95) + 1;
     const chance = Math.floor(Math.random()*2) + 1;
     if(chance == 1)
-    enemy.position.set(newpos,10,-200);
+        enemy.position.set(newpos,10,-200);
     else
-    enemy.position.set(-newpos,10,-200);
-    
+        enemy.position.set(-newpos,10,-200);
     enemy.geometry.computeBoundingBox();
-    const velocidade = Math.floor(Math.random()*5) + 2
+    const velocidade = Math.floor(Math.random()*5) + 2;
     velocidades.push(velocidade);
-    
     // add the enemy to the scene
     scene.add(enemy);
-
     adversarios.push(enemy);
 }
 
@@ -147,8 +141,7 @@ function movimentarAdversario(){
     switch(movimento){
         case 0: vertical();
         default: ;
-    }
-    
+    } 
 }
 
 // Função para mover os inimigos na vertical
@@ -194,8 +187,6 @@ function colisionPlane(){
             let x = aux.copy(enemy);
             acertouaviao = true;
             removePlane();
-            
-            
             enemiesAnimation.push(x);
             let id2 = adversarios.indexOf(enemy);
             adversarios.splice(id2, 1);
@@ -269,12 +260,9 @@ function animation() {
 //********************************************//
 //Função para usar as teclas
 function keyboardUpdate() {
-
     keyboard.update();
-
     var speed = 40;
     var moveDistance = speed * clock.getDelta();
-
     // Keyboard.pressed - execute while is pressed
     cone.getWorldPosition(target);
     if (keyboard.pressed("down")){
