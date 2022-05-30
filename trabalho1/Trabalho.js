@@ -7,6 +7,8 @@ import {
     createGroundPlaneWired
 } from "../libs/util/util.js";
 
+import { default as Plane } from './Plane.js'
+
 var scene = new THREE.Scene();    // Create main scene
 var renderer = initRenderer();
 var clock = new THREE.Clock();
@@ -53,13 +55,17 @@ const material = new THREE.MeshLambertMaterial( {color:'rgb(180,180,255)'} );
 var cone = new THREE.Mesh( geometry, material );
 cone.position.set(0,6,0);
 cone.rotateX(-1.6);
-
 cone.geometry.computeBoundingBox();
 
 //Criando o que vai movimentar o avião
 var planeHolder = new THREE.Object3D();
 planeHolder.add(cone);
 scene.add( planeHolder );
+
+// const planeClass = new Plane();
+// var planeHolder = new THREE.Object3D();
+// planeHolder.add(planeClass.mesh);
+// scene.add( planeHolder );
 //********************************************//
 
 //********************************************//
@@ -165,7 +171,8 @@ function vertical(){
 
 //********************************************//
 /**
- * Colisão entre tiro e inimigo e animção
+ * Colisão en
+      // aviaoBox = box3.copy(cone.geometry.boundingBox).applyMatrix4(cone.matrixWorld);tre tiro e inimigo e animção
  */
 const box = new THREE.Box3();
 const box2 = new THREE.Box3();
@@ -286,12 +293,21 @@ function keyboardUpdate() {
 }
 //********************************************//
 
+//********************************************//
+//Função para atualizar o tamanho da tela
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+}
+//********************************************//
 render();
 
 document.getElementById("webgl-output").appendChild(stats.domElement);//Pra mostrar o FPS
 
 function render() {
     stats.update();
+    onWindowResize();
     keyboardUpdate();
     moveBullets();
     deleteBullets();
