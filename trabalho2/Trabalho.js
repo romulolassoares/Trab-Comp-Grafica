@@ -202,7 +202,7 @@ function colision() {
                 let x = aux.copy(enemy.mesh);
                 enemiesAnimation.push(x);
                 scene.remove(enemy.mesh);
-                scene.remove(bullet);
+                scene.remove(bullet.mesh);
                 bullets.splice(idShoot, 1);
                 enemyVector.splice(idEnemy, 1);
             }
@@ -277,7 +277,7 @@ function keyboardUpdate() {
         if(target.x >= -95)
         planeHolder.translateX(-moveDistance);
     }
-    if (keyboard.down("ctrl")) createShoot();
+    if (keyboard.pressed("ctrl")) createShoot();
     if (keyboard.down("space")) createShoot();
 }
 //********************************************//
