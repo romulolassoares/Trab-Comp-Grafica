@@ -7,8 +7,7 @@ import {
     createGroundPlaneWired
 } from "../libs/util/util.js";
 
-import { default as Plane } from './Plane.js';
-import { default as Enemy } from './Enemy.js';
+import { default as Plane } from './Plane.js'
 
 var scene = new THREE.Scene();    // Create main scene
 var renderer = initRenderer();
@@ -51,10 +50,22 @@ var keyboard = new KeyboardState();
 
 //********************************************//
 //Criando o avião
-const planeClass = new Plane();
+const geometry = new THREE.ConeGeometry( 5, 15, 64 );
+const material = new THREE.MeshLambertMaterial( {color:'rgb(180,180,255)'} );
+var cone = new THREE.Mesh( geometry, material );
+cone.position.set(0,6,0);
+cone.rotateX(-1.6);
+cone.geometry.computeBoundingBox();
+
+//Criando o que vai movimentar o avião
 var planeHolder = new THREE.Object3D();
-planeHolder.add(planeClass.mesh);
+planeHolder.add(cone);
 scene.add( planeHolder );
+
+// const planeClass = new Plane();
+// var planeHolder = new THREE.Object3D();
+// planeHolder.add(planeClass.mesh);
+// scene.add( planeHolder );
 //********************************************//
 
 //********************************************//
@@ -68,7 +79,7 @@ var bullets = []; // Vetor de todas as balas
 // Função para criar um tiro
 function createShoot() {
     let shoot = new THREE.Mesh(espgeometry, espmaterial);
-    planeClass.mesh.getWorldPosition(target);
+    cone.getWorldPosition(target);
     shoot.position.set(target.x,target.y,target.z);
     // shoot.geometry.computeBoundingBox();
     scene.add(shoot);
@@ -80,6 +91,7 @@ function createShoot() {
 function moveBullets() {
     bullets.forEach(item => {
         item.translateZ(-1);
+        
     });
 }
 
@@ -99,7 +111,6 @@ function deleteBullets() {
 //********************************************//
 // Criando Adversários
 var adversarios = [];
-var enemyVector = [];
 var velocidades = [];
 var cubeGeometry = new THREE.BoxGeometry(10, 10, 10);
 var cubeMaterial = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
@@ -107,21 +118,26 @@ var cubeMaterial = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
 // função para limitar quantos inimigos tem na tela
 function chamaAdversario(){
     var chance = Math.floor(Math.random()*900) + 1;
-    if(chance <=10){ // 0.01%
+    if(chance <=10){
         criarAdversario();
     }
 }
 
 function criarAdversario(){
-    let enemy = new Enemy();
-    var newpos = Math.floor(Math.random()*95) + 1;
+    let enemy = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    // position the cube
+    const newpos = Math.floor(Math.random()*95) + 1;
     const chance = Math.floor(Math.random()*2) + 1;
-    newpos = chance === 1 ? newpos : -newpos;
-    enemy.setPosition(newpos);
+    if(chance == 1)
+        enemy.position.set(newpos,10,-200);
+    else
+        enemy.position.set(-newpos,10,-200);
+    enemy.geometry.computeBoundingBox();
     const velocidade = Math.floor(Math.random()*5) + 2;
-    enemy.setVelocity(velocidade);
-    scene.add(enemy.mesh);
-    enemyVector.push(enemy);
+    velocidades.push(velocidade);
+    // add the enemy to the scene
+    scene.add(enemy);
+    adversarios.push(enemy);
 }
 
 // a ideia é fazer adversário se movimentarem aleatoriamente 
@@ -136,18 +152,20 @@ function movimentarAdversario(){
 
 // Função para mover os inimigos na vertical
 function vertical(){
-    enemyVector.forEach(enemy => {
-        enemy.mesh.updateMatrixWorld(true);
-        if(enemy.getPositionZ() >= 70){
-            scene.remove(enemy.mesh);
-            let id = enemyVector.indexOf(enemy);
-            enemyVector.splice(id, 1);
+    adversarios.forEach(item => {
+        item.updateMatrixWorld(true);
+        if(item.position.z >= 70){
+            scene.remove(item);
+            let id = adversarios.indexOf(item);
+            adversarios.splice(id, 1);
+            velocidades.splice(id, 1);
         }
-        if(enemy.getPositionZ() < 70){
-            var v = enemy.velocity;
-            enemy.mesh.translateZ(0.2*v);
+        if(item.position.z < 70){
+            let id = adversarios.indexOf(item);
+            var v = velocidades.at(id);
+            item.translateZ(0.2*v);
         }
-    });
+    })
 }
 //********************************************//
 
@@ -161,62 +179,46 @@ const box2 = new THREE.Box3();
 const box3 = new THREE.Box3();
 var enemyBox;
 var bulletBox;
+var aviaoBox;
 var acertouaviao = false;
-var aux = new THREE.Mesh();
-
 /**
  * Função para validar se ocorreu colisão entre os tiros e os inimigos.
  * Caso ocorra uma colisão o tiro e o inimigo são removidos da tela.
  */
 function colisionPlane(){
-    enemyVector.forEach(enemy => {
-        let planeBox = box3.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
-        let enemyBox = box.copy(enemy.getBoundingBox()).applyMatrix4(enemy.mesh.matrixWorld);
-        if(enemyBox.containsBox(planeBox) || enemyBox.intersectsBox(planeBox)) {
-            scene.remove(enemy.mesh);
-            let x = aux.copy(enemy.mesh);
+    adversarios.forEach(enemy => {
+        enemyBox = box.copy( enemy.geometry.boundingBox ).applyMatrix4( enemy.matrixWorld )
+        aviaoBox = box3.copy(cone.geometry.boundingBox).applyMatrix4(cone.matrixWorld);
+        if(enemyBox.containsBox(aviaoBox) || enemyBox.intersectsBox(aviaoBox)) {
+            scene.remove(enemy);
+            let x = aux.copy(enemy);
             acertouaviao = true;
+            removePlane();
             enemiesAnimation.push(x);
-            let id2 = enemyVector.indexOf(enemy);
-            enemyVector.splice(id2, 1);
+            let id2 = adversarios.indexOf(enemy);
+            adversarios.splice(id2, 1);
         }
     });
 }
-
+var aux = new THREE.Mesh();
 function colision() {
-    enemyVector.forEach(enemy => {
-        let enemyBox = box.copy(enemy.getBoundingBox()).applyMatrix4(enemy.mesh.matrixWorld);
+    adversarios.forEach(enemy => {
+        enemyBox = box.copy( enemy.geometry.boundingBox ).applyMatrix4( enemy.matrixWorld )
         bullets.forEach(shoot => {
             bulletBox = box2.copy( shoot.geometry.boundingBox ).applyMatrix4( shoot.matrixWorld )
             if(enemyBox.containsBox(bulletBox) || enemyBox.intersectsBox(bulletBox)) {
-                let idShoot = bullets.indexOf(shoot);
-                let idEnemy = enemyVector.indexOf(enemy);
-                let x = aux.copy(enemy.mesh);
+                let x = aux.copy(enemy);
                 enemiesAnimation.push(x);
-                scene.remove(enemy.mesh);
+                let id2 = adversarios.indexOf(enemy);
+                scene.remove(enemy);
                 scene.remove(shoot);
-                bullets.splice(idShoot, 1);
-                enemyVector.splice(idEnemy, 1);
+                let id = bullets.indexOf(shoot);
+                bullets.splice(id, 1);
+                adversarios.splice(id2, 1);
+                velocidades.splice(id2, 1);
             }
-        })
-    })
-    // adversarios.forEach(enemy => {
-    //     enemyBox = box.copy( enemy.geometry.boundingBox ).applyMatrix4( enemy.matrixWorld )
-    //     bullets.forEach(shoot => {
-    //         bulletBox = box2.copy( shoot.geometry.boundingBox ).applyMatrix4( shoot.matrixWorld )
-    //         if(enemyBox.containsBox(bulletBox) || enemyBox.intersectsBox(bulletBox)) {
-    //             let x = aux.copy(enemy);
-    //             enemiesAnimation.push(x);
-    //             let id2 = adversarios.indexOf(enemy);
-    //             scene.remove(enemy);
-    //             scene.remove(shoot);
-    //             let id = bullets.indexOf(shoot);
-    //             bullets.splice(id, 1);
-    //             adversarios.splice(id2, 1);
-    //             velocidades.splice(id2, 1);
-    //         }
-    //     });
-    // });
+        });
+    });
 }
 
 /**
@@ -225,15 +227,15 @@ function colision() {
 var enemiesAnimation = [];
 
 function removePlane(){
-    if(planeClass.mesh.scale.x>=0){
-        planeClass.mesh.scale.x -=.1;
-        planeClass.mesh.scale.y -=.1;
-        planeClass.mesh.scale.z -=.1;
+    if(cone.scale.x>=0){
+        cone.scale.x -=.1;
+        cone.scale.y -=.1;
+        cone.scale.z -=.1;
     }
-    if(planeClass.mesh.scale.x <= 0){
+    if(cone.scale.x <= 0){
         acertouaviao = false;
         planeHolder.position.set(0,6,0);
-        planeClass.mesh.scale.set(1,1,1);
+        cone.scale.set(1,1,1);
     }
 }
 
@@ -269,7 +271,7 @@ function keyboardUpdate() {
     var speed = 40;
     var moveDistance = speed * clock.getDelta();
     // Keyboard.pressed - execute while is pressed
-    planeClass.mesh.getWorldPosition(target);
+    cone.getWorldPosition(target);
     if (keyboard.pressed("down")){
         if(target.z <= 45)
             planeHolder.translateZ(moveDistance);
