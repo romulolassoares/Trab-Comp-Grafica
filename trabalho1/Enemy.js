@@ -7,20 +7,28 @@ export default class Plane {
    // Public
    mesh;
    boundingBox = new THREE.Box3();
+   velocity;
 
-   constructor(newpos) {
+   constructor() {
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
+      this.mesh.geometry.computeBoundingBox();
+      // this.mesh.position.set(newpos,10,-200);
+      this.boundingBox.copy(this.mesh.geometry.boundingBox).applyMatrix4(this.mesh.matrixWorld);
+   }
+
+   setPosition(newpos) {
       this.mesh.position.set(newpos,10,-200);
-      // this.boundingBox.copy(this.mesh.geometry.boundingBox).applyMatrix4(this.mesh.matrixWorld);
    }
 
-   get mesh() {
-      return this.mesh;
+   setVelocity(vel) {
+      this.velocity = vel;
    }
 
-   get boundingBox() {
+   getPositionZ() {
+      return this.mesh.position.z;
+   }
+
+   getBoundingBox() {
       return this.boundingBox;
    }
-
-
 }
