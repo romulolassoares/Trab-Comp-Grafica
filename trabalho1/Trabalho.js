@@ -34,9 +34,9 @@ for(let i = 0; i< 3; i++){
 
 function moverPlanos() {
     planos.forEach(item => {
-        item.translateY(-0.5);
+        item.translateY(-0.3);
         item.updateMatrixWorld(true);
-        if(item.position.z == 50) {
+        if(item.position.z >= 50) {
             item.position.set(0,0,-250);
         }
     });
