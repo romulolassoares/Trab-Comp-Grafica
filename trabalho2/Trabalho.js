@@ -9,6 +9,7 @@ import {
 
 import { default as Plane } from './Plane.js';
 import { default as Enemy } from './Enemy.js';
+import { default as Bullet } from './Bullet.js';
 
 var scene = new THREE.Scene();    // Create main scene
 var renderer = initRenderer();
@@ -67,28 +68,35 @@ var bullets = []; // Vetor de todas as balas
 
 // Função para criar um tiro
 function createShoot() {
-    let shoot = new THREE.Mesh(espgeometry, espmaterial);
+    let bullet = new Bullet();
     planeClass.mesh.getWorldPosition(target);
-    shoot.position.set(target.x,target.y,target.z);
+    bullet.setPosition(target);
+    scene.add(bullet.mesh);
+    bullets.push(bullet);
+
+    // -------------
+    // let shoot = new THREE.Mesh(espgeometry, espmaterial);
+    // planeClass.mesh.getWorldPosition(target);
+    // shoot.position.set(target.x,target.y,target.z);
+    // // shoot.geometry.computeBoundingBox();
+    // scene.add(shoot);
     // shoot.geometry.computeBoundingBox();
-    scene.add(shoot);
-    shoot.geometry.computeBoundingBox();
-    bullets.push(shoot);
+    // bullets.push(shoot);
 }
 
 // Função para mover os tiros para frente
 function moveBullets() {
     bullets.forEach(item => {
-        item.translateZ(-1);
+        item.mesh.translateZ(-1);
     });
 }
 
 // Função para deletar os tiros a partir de uma posição
 function deleteBullets() {
     bullets.forEach(item => {
-        item.updateMatrixWorld(true);
-        if(item.position.z == -185) {
-            scene.remove(item);
+        item.mesh.updateMatrixWorld(true);
+        if(item.mesh.position.z == -185) {
+            scene.remove(item.mesh);
             let id = bullets.indexOf(item);
             bullets.splice(id, 1);
         }
@@ -98,11 +106,11 @@ function deleteBullets() {
 
 //********************************************//
 // Criando Adversários
-var adversarios = [];
+// var adversarios = [];
 var enemyVector = [];
-var velocidades = [];
-var cubeGeometry = new THREE.BoxGeometry(10, 10, 10);
-var cubeMaterial = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
+// var velocidades = [];
+// var cubeGeometry = new THREE.BoxGeometry(10, 10, 10);
+// var cubeMaterial = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
 
 // função para limitar quantos inimigos tem na tela
 function chamaAdversario(){
@@ -159,8 +167,8 @@ function vertical(){
 const box = new THREE.Box3();
 const box2 = new THREE.Box3();
 const box3 = new THREE.Box3();
-var enemyBox;
-var bulletBox;
+// var enemyBox;
+// var bulletBox;
 var acertouaviao = false;
 var aux = new THREE.Mesh();
 
@@ -186,37 +194,20 @@ function colisionPlane(){
 function colision() {
     enemyVector.forEach(enemy => {
         let enemyBox = box.copy(enemy.getBoundingBox()).applyMatrix4(enemy.mesh.matrixWorld);
-        bullets.forEach(shoot => {
-            bulletBox = box2.copy( shoot.geometry.boundingBox ).applyMatrix4( shoot.matrixWorld )
+        bullets.forEach(bullet => {
+            let bulletBox = box2.copy(bullet.getBoundingBox()).applyMatrix4( bullet.mesh.matrixWorld )
             if(enemyBox.containsBox(bulletBox) || enemyBox.intersectsBox(bulletBox)) {
-                let idShoot = bullets.indexOf(shoot);
+                let idShoot = bullets.indexOf(bullet);
                 let idEnemy = enemyVector.indexOf(enemy);
                 let x = aux.copy(enemy.mesh);
                 enemiesAnimation.push(x);
                 scene.remove(enemy.mesh);
-                scene.remove(shoot);
+                scene.remove(bullet);
                 bullets.splice(idShoot, 1);
                 enemyVector.splice(idEnemy, 1);
             }
-        })
-    })
-    // adversarios.forEach(enemy => {
-    //     enemyBox = box.copy( enemy.geometry.boundingBox ).applyMatrix4( enemy.matrixWorld )
-    //     bullets.forEach(shoot => {
-    //         bulletBox = box2.copy( shoot.geometry.boundingBox ).applyMatrix4( shoot.matrixWorld )
-    //         if(enemyBox.containsBox(bulletBox) || enemyBox.intersectsBox(bulletBox)) {
-    //             let x = aux.copy(enemy);
-    //             enemiesAnimation.push(x);
-    //             let id2 = adversarios.indexOf(enemy);
-    //             scene.remove(enemy);
-    //             scene.remove(shoot);
-    //             let id = bullets.indexOf(shoot);
-    //             bullets.splice(id, 1);
-    //             adversarios.splice(id2, 1);
-    //             velocidades.splice(id2, 1);
-    //         }
-    //     });
-    // });
+        });
+    });
 }
 
 /**
