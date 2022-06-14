@@ -257,6 +257,7 @@ function animation() {
 //********************************************//
 
 //********************************************//
+let cooldown = false;
 //Função para usar as teclas
 function keyboardUpdate() {
     keyboard.update();
@@ -280,7 +281,11 @@ function keyboardUpdate() {
         if(target.x >= -95)
         planeHolder.translateX(-moveDistance);
     }
-    if (keyboard.pressed("ctrl")) createShoot();
+    if (keyboard.pressed("ctrl") && !cooldown){
+        createShoot();
+        cooldown = true;
+        setTimeout( () => cooldown = false, 500);
+    }
     if (keyboard.down("space")) createShoot();
 }
 //********************************************//
