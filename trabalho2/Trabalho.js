@@ -26,6 +26,10 @@ camera.lookAt(0, 15, 0);
 scene.add( camera );
 //********************************************//
 
+const sleep = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 //********************************************//
 //Criando os planos
 var planos = [];
@@ -67,13 +71,12 @@ var target = new THREE.Vector3();
 var bullets = []; // Vetor de todas as balas
 
 // Função para criar um tiro
-function createShoot() {
+async function createShoot() {
     let bullet = new Bullet();
     planeClass.mesh.getWorldPosition(target);
     bullet.setPosition(target);
     scene.add(bullet.mesh);
     bullets.push(bullet);
-
     // -------------
     // let shoot = new THREE.Mesh(espgeometry, espmaterial);
     // planeClass.mesh.getWorldPosition(target);
