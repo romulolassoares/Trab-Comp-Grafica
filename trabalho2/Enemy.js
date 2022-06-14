@@ -8,12 +8,14 @@ export default class Plane {
    mesh;
    boundingBox = new THREE.Box3();
    velocity;
+   isDead;
 
    constructor() {
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
       this.mesh.geometry.computeBoundingBox();
       // this.mesh.position.set(newpos,10,-200);
       this.boundingBox.copy(this.mesh.geometry.boundingBox).applyMatrix4(this.mesh.matrixWorld);
+      this.isDead = false;
    }
 
    setPosition(newpos) {
@@ -30,5 +32,10 @@ export default class Plane {
 
    getBoundingBox() {
       return this.boundingBox;
+   }
+
+   setIsDead() {
+      this.isDead = true;
+      this.velocity = 0;
    }
 }

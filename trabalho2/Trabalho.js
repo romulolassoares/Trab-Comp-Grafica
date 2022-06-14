@@ -184,12 +184,13 @@ function colisionPlane(){
         let planeBox = box3.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
         let enemyBox = box.copy(enemy.getBoundingBox()).applyMatrix4(enemy.mesh.matrixWorld);
         if(enemyBox.containsBox(planeBox) || enemyBox.intersectsBox(planeBox)) {
-            scene.remove(enemy.mesh);
-            let x = aux.copy(enemy.mesh);
+            // let x = aux.copy(enemy.mesh);
             acertouaviao = true;
-            enemiesAnimation.push(x);
+            enemy.setIsDead();
+            // enemiesAnimation.push(x);
             let id2 = enemyVector.indexOf(enemy);
-            enemyVector.splice(id2, 1);
+            // enemyVector.splice(id2, 1);
+            // scene.remove(enemy.mesh);
         }
     });
 }
@@ -201,13 +202,14 @@ function colision() {
             let bulletBox = box2.copy(bullet.getBoundingBox()).applyMatrix4( bullet.mesh.matrixWorld )
             if(enemyBox.containsBox(bulletBox) || enemyBox.intersectsBox(bulletBox)) {
                 let idShoot = bullets.indexOf(bullet);
-                let idEnemy = enemyVector.indexOf(enemy);
-                let x = aux.copy(enemy.mesh);
-                enemiesAnimation.push(x);
-                scene.remove(enemy.mesh);
+                // let idEnemy = enemyVector.indexOf(enemy);
+                // let x = aux.copy(enemy.mesh);
+                enemy.setIsDead();
+                // enemiesAnimation.push(x);
+                // scene.remove(enemy.mesh);
                 scene.remove(bullet.mesh);
                 bullets.splice(idShoot, 1);
-                enemyVector.splice(idEnemy, 1);
+                // enemyVector.splice(idEnemy, 1);
             }
         });
     });
@@ -216,7 +218,7 @@ function colision() {
 /**
  * Para efetuar a animação dos inimigos
  */
-var enemiesAnimation = [];
+// var enemiesAnimation = [];
 
 function removePlane(){
     if(planeClass.mesh.scale.x>=0){
@@ -231,27 +233,45 @@ function removePlane(){
     }
 }
 
-function excluirInimgo(id){
-    enemiesAnimation.forEach(item => {
-        if(enemiesAnimation.indexOf(item) == id){
-            scene.remove(item);
-            enemiesAnimation.splice(id,1);
-        }
-    })
-}
+// function excluirInimgo(id){
+//     enemiesAnimation.forEach(item => {
+//         if(enemiesAnimation.indexOf(item) == id){
+//             scene.remove(item);
+//             enemiesAnimation.splice(id,1);
+//         }
+//     })
+// }
 
 function animation() {
-    enemiesAnimation.forEach(item => {
-        scene.add(item);
-        item.rotation.y += 0.1;
-        item.rotation.x += 0.1;
-        if(item.scale.x>=0){
-            item.scale.x -=.1;
-            item.scale.y -=.1;
-            item.scale.z -=.1;
+    // enemiesAnimation.forEach(item => {
+    //     scene.add(item);
+    //     item.rotation.y += 0.1;
+    //     item.rotation.x += 0.1;
+    //     if(item.scale.x>=0){
+    //         item.scale.x -=.1;
+    //         item.scale.y -=.1;
+    //         item.scale.z -=.1;
+    //     }
+    //     if(item.scale.x <= 0)
+    //         excluirInimgo(enemiesAnimation.indexOf(item));
+    // })
+
+    enemyVector.forEach(enemy => {
+        if(enemy.isDead == true){
+            console.log("dead");
+            enemy.mesh.rotation.y += 0.1;
+            enemy.mesh.rotation.x += 0.1;
+            if(enemy.mesh.scale.x>=0){
+                enemy.mesh.scale.x -=.1;
+                enemy.mesh.scale.y -=.1;
+                enemy.mesh.scale.z -=.1;
+            }
+            if(enemy.mesh.scale.x <= 0) {
+                let idEnemy = enemyVector.indexOf(enemy);
+                scene.remove(enemy.mesh);
+                enemyVector.splice(idEnemy, 1);
+            }
         }
-        if(item.scale.x <= 0)
-            excluirInimgo(enemiesAnimation.indexOf(item));
     })
 }
 //********************************************//
