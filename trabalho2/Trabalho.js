@@ -71,7 +71,7 @@ var target = new THREE.Vector3();
 var bullets = []; // Vetor de todas as balas
 
 // Função para criar um tiro
-async function createShoot() {
+function createShoot() {
     let bullet = new Bullet();
     planeClass.mesh.getWorldPosition(target);
     bullet.setPosition(target);
@@ -85,6 +85,22 @@ async function createShoot() {
     // scene.add(shoot);
     // shoot.geometry.computeBoundingBox();
     // bullets.push(shoot);
+}
+
+function createEnemyShoot() {
+
+    // let cooldown = false
+    enemyVector.forEach(enemy => {
+        if(enemy.isShooting == true && !enemy.bulletCooldown) {
+            enemy.bulletCooldown = true;
+            setTimeout( () => enemy.bulletCooldown = false, 3000);
+            let bullet = new Bullet();
+            enemy.mesh.getWorldPosition(target);
+            bullet.setPosition(target);
+            scene.add(bullet.mesh);
+            enemy.bullets.push(bullet);
+        }
+    });
 }
 
 // Função para mover os tiros para frente
@@ -326,6 +342,7 @@ function render() {
     stats.update();
     onWindowResize();
     keyboardUpdate();
+    createEnemyShoot();
     moveBullets();
     deleteBullets();
     moverPlanos();

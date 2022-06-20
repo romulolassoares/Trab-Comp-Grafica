@@ -9,6 +9,9 @@ export default class Plane {
    boundingBox = new THREE.Box3();
    velocity;
    isDead;
+   isShooting;
+   bullets;
+   bulletCooldown;
 
    constructor() {
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
@@ -16,6 +19,9 @@ export default class Plane {
       // this.mesh.position.set(newpos,10,-200);
       this.boundingBox.copy(this.mesh.geometry.boundingBox).applyMatrix4(this.mesh.matrixWorld);
       this.isDead = false;
+      this.isShooting = true;
+      this.bullets = [];
+      this.bulletCooldown = false;
    }
 
    setPosition(newpos) {
