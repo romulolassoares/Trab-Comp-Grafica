@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import Stats from '../build/jsm/libs/stats.module.js';
+import {ConvexGeometry} from '../build/jsm/geometries/ConvexGeometry.js';
 import KeyboardState from '../libs/util/KeyboardState.js'
 import {
-    initRenderer,
-    initDefaultBasicLight,
+    onWindowResize,
+    degreesToRadians,
     createGroundPlaneWired
 } from "../libs/util/util.js";
 
@@ -11,32 +12,68 @@ import { default as Plane } from './classes/Plane.js';
 import { default as Enemy } from './classes/Enemy.js';
 
 var scene = new THREE.Scene();    // Create main scene
-var renderer = initRenderer();
+
+var renderer = new THREE.WebGLRenderer();
+document.getElementById("webgl-output").appendChild(renderer.domElement);
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.VSMShadowMap; // default
+
 var clock = new THREE.Clock();
 clock.start();
 var stats = new Stats(); //Pra ver os status do FPS
-initDefaultBasicLight(scene);
+// initDefaultBasicLight(scene);
+// var renderer = initRenderer();
+//********************************************//
+// Criando a luz
+var position = new THREE.Vector3(0, 100, 70);
+
+
+var dirLight = new THREE.DirectionalLight("rgb(255,255,255)");
+setDirectionalLighting(position);
+
+function setDirectionalLighting(position) {
+    dirLight.position.copy(position);
+    dirLight.shadow.mapSize.width = 256;
+    dirLight.shadow.mapSize.height = 256;
+    dirLight.castShadow = true;
+
+    dirLight.shadow.camera.near = .1;
+    dirLight.shadow.camera.far = 20;
+    dirLight.shadow.camera.left = -2.5;
+    dirLight.shadow.camera.right = 2.5;
+    dirLight.shadow.camera.top = 2.5;
+    dirLight.shadow.camera.bottom = -2.5;
+    colisionPlaneEnemy
+    scene.add(dirLight);
+}
+//********************************************//
+
 //********************************************//
 //Criando a camera
-var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/ window.innerHeight, 1, 300 );
+var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300);
 camera.position.set(0, 100, 70);
 // camera.position.set(0, 0, 70);
 camera.lookAt(0, 15, 0);
-scene.add( camera );
+scene.add(camera);
 //********************************************//
 //Criando os planos
 var planos = [];
-for(let i = 0; i< 3; i++){
+
+for (let i = 0; i < 3; i++) {
     planos[i] = createGroundPlaneWired(800, 200);
-    planos[i].position.set(0,0,i*-100);
+    //Usar o rotate para se for plano sem ser wired
+    // planos[i].rotateX(degreesToRadians(-90));
+    planos[i].position.set(0, 0, i * -100);
+    planos[i].receiveShadow = true;
     scene.add(planos[i]);
 }
 function moverPlanos() {
     planos.forEach(item => {
         item.translateY(-0.5);
         item.updateMatrixWorld(true);
-        if(item.position.z == 50) {
-            item.position.set(0,0,-250);
+        if (item.position.z == 50) {
+            item.position.set(0, 0, -250);
         }
     });
 }
@@ -48,7 +85,7 @@ var keyboard = new KeyboardState();
 const planeClass = new Plane();
 var planeHolder = new THREE.Object3D();
 planeHolder.add(planeClass.mesh);
-scene.add( planeHolder );
+scene.add(planeHolder);
 //********************************************//
 var target = new THREE.Vector3();
 
@@ -57,49 +94,67 @@ var target = new THREE.Vector3();
 var enemyVector = [];
 
 // função para limitar quantos inimigos tem na tela
-function chamaAdversario(){
-    var chance = Math.floor(Math.random()*900) + 1;
-    if(chance <=10){ // 0.01%
+function chamaAdversario() {
+    var chance = Math.floor(Math.random() * 900) + 1;
+    if (chance <= 20) { // 0.01%
         criarAdversario();
     }
 }
 
-function criarAdversario(){
+function criarAdversario() {
     let enemy = new Enemy();
-    var newpos = Math.floor(Math.random()*95) + 1;
-    const chance = Math.floor(Math.random()*2) + 1;
+    var newpos = Math.floor(Math.random() * 95) + 1;
+    newpos = 0;
+    const chance = Math.floor(Math.random() * 2) + 1;
     newpos = chance === 1 ? newpos : -newpos;
     enemy.setPosition(newpos);
-    const velocidade = Math.floor(Math.random()*5) + 2;
+    const velocidade = Math.floor(Math.random() * 5) + 2;
     enemy.setVelocity(velocidade);
+    enemy.castShadow = true;
+    enemy.receiveShadow = true;
     scene.add(enemy.mesh);
     enemyVector.push(enemy);
 }
 
 // a ideia é fazer adversário se movimentarem aleatoriamente 
 // sendo os tipo de movimento: vertical, horizontal, diagonal ...
-function movimentarAdversario(){
-    var movimento = Math.floor(Math.random()*1);
-    switch(movimento){
-        case 0: vertical();
-        default: ;
-    } 
+function movimentarAdversario() {
+    enemyVector.forEach(enemy => {
+        enemy.movimentation = Math.floor(Math.random() * 2);
+        switch (enemy.movimentation) {
+            case 0: vertical(enemy);
+            // case 1: diagonal(enemy);
+            default: ;
+        }
+    });
 }
 
 // Função para mover os inimigos na vertical
-function vertical(){
-    enemyVector.forEach(enemy => {
-        enemy.mesh.updateMatrixWorld(true);
-        if(enemy.getPositionZ() >= 70){
-            scene.remove(enemy.mesh);
-            let id = enemyVector.indexOf(enemy);
-            enemyVector.splice(id, 1);
-        }
-        if(enemy.getPositionZ() < 70){
-            var v = enemy.velocity;
-            enemy.mesh.translateZ(0.2*v);
-        }
-    });
+function vertical(enemy) {
+    enemy.mesh.updateMatrixWorld(true);
+    if (enemy.getPositionZ() >= 70) {
+        scene.remove(enemy.mesh);
+        let id = enemyVector.indexOf(enemy);
+        enemyVector.splice(id, 1);
+    }
+    if (enemy.getPositionZ() < 70) {
+        var v = enemy.velocity;
+        enemy.mesh.translateZ(0.2 * v);
+    }
+}
+
+function diagonal(enemy) {
+    enemy.mesh.updateMatrixWorld(true);
+    if (enemy.getPositionZ() >= 70 && enemy.getPositionX() >= 95) {
+        scene.remove(enemy.mesh);
+        let id = enemyVector.indexOf(enemy);
+        enemyVector.splice(id, 1);
+    }
+    if (enemy.getPositionX() < 95 || enemy.getPositionZ() < 70) {
+        var v = enemy.velocity;
+        enemy.mesh.translateZ(0.2 * v);
+        enemy.mesh.translateX(0.2 * v);
+    }
 }
 //********************************************//
 
@@ -150,10 +205,10 @@ function removePlane(){
         planeClass.mesh.scale.y -=.1;
         planeClass.mesh.scale.z -=.1;
     }
-    if(planeClass.mesh.scale.x <= 0){
-        acertouaviao = false;
-        planeHolder.position.set(0,6,0);
-        planeClass.mesh.scale.set(1,1,1);
+    if (planeClass.mesh.scale.x <= 0) {
+        planeClass.acertouaviao = false;
+        planeHolder.position.set(0, 6, 0);
+        planeClass.mesh.scale.set(1, 1, 1);
     }
 }
 
@@ -189,42 +244,37 @@ function keyboardUpdate() {
     var moveDistance = speed * clock.getDelta();
     // Keyboard.pressed - execute while is pressed
     planeClass.mesh.getWorldPosition(target);
-    if (keyboard.pressed("down")){
-        if(target.z <= 45)
+    if (keyboard.pressed("down")) {
+        if (target.z <= 45)
             planeHolder.translateZ(moveDistance);
-    } 
+    }
     if (keyboard.pressed("up")) {
-        if(target.z >= -150)
+        if (target.z >= -150)
             planeHolder.translateZ(-moveDistance);
     }
-    if (keyboard.pressed("right")){
-        if(target.x <= 95)
-        planeHolder.translateX(moveDistance); 
-    } 
+    if (keyboard.pressed("right")) {
+        if (target.x <= 95)
+            planeHolder.translateX(moveDistance);
+    }
     if (keyboard.pressed("left")) {
-        if(target.x >= -95)
-        planeHolder.translateX(-moveDistance);
+        if (target.x >= -95)
+            planeHolder.translateX(-moveDistance);
     }
     if (keyboard.pressed("ctrl") && !cooldownBullet){
         planeClass.createShoot(scene);
         cooldownBullet = true;
         setTimeout( () => cooldownBullet = false, 500);
     }
-    if (keyboard.down("space") && !cooldownMissile){
+    if (keyboard.pressed("space") && !cooldownMissile){
         planeClass.createMissiles(scene);
         cooldownMissile = true;
-        setTimeout( () => cooldownMissile = false, 800);
+        setTimeout( () => cooldownMissile = false, 1000);
     }
 }
 //********************************************//
 
 //********************************************//
-//Função para atualizar o tamanho da tela
-function onWindowResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize( window.innerWidth, window.innerHeight );
-}
+window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
 //********************************************//
 render();
 

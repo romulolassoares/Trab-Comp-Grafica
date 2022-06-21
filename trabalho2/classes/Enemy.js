@@ -41,6 +41,10 @@ export default class Plane {
       return this.mesh.position.z;
    }
 
+   getPositionX() {
+      return this.mesh.position.x;
+   }
+
    getBoundingBox() {
       return this.boundingBox;
    }
