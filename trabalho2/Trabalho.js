@@ -7,9 +7,8 @@ import {
     createGroundPlaneWired
 } from "../libs/util/util.js";
 
-import { default as Plane } from './Plane.js';
-import { default as Enemy } from './Enemy.js';
-import { default as Bullet } from './Bullet.js';
+import { default as Plane } from './classes/Plane.js';
+import { default as Enemy } from './classes/Enemy.js';
 
 var scene = new THREE.Scene();    // Create main scene
 var renderer = initRenderer();
@@ -17,29 +16,21 @@ var clock = new THREE.Clock();
 clock.start();
 var stats = new Stats(); //Pra ver os status do FPS
 initDefaultBasicLight(scene);
-
 //********************************************//
 //Criando a camera
 var camera = new THREE.PerspectiveCamera( 60, window.innerWidth/ window.innerHeight, 1, 300 );
 camera.position.set(0, 100, 70);
+// camera.position.set(0, 0, 70);
 camera.lookAt(0, 15, 0);
 scene.add( camera );
 //********************************************//
-
-const sleep = (ms) => {
-    return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-//********************************************//
 //Criando os planos
 var planos = [];
-
 for(let i = 0; i< 3; i++){
     planos[i] = createGroundPlaneWired(800, 200);
     planos[i].position.set(0,0,i*-100);
     scene.add(planos[i]);
 }
-
 function moverPlanos() {
     planos.forEach(item => {
         item.translateY(-0.5);
@@ -50,10 +41,8 @@ function moverPlanos() {
     });
 }
 //********************************************//
-
 //Para usar o Keyboard
 var keyboard = new KeyboardState();
-
 //********************************************//
 //Criando o avião
 const planeClass = new Plane();
@@ -61,75 +50,11 @@ var planeHolder = new THREE.Object3D();
 planeHolder.add(planeClass.mesh);
 scene.add( planeHolder );
 //********************************************//
-
-//********************************************//
-//Criando os tiros
-const espgeometry = new THREE.SphereGeometry(1, 20, 50);
-const espmaterial = new THREE.MeshLambertMaterial({color:"rgb(255, 165, 0)"});
 var target = new THREE.Vector3();
-
-var bullets = []; // Vetor de todas as balas
-
-// Função para criar um tiro
-function createShoot() {
-    let bullet = new Bullet();
-    planeClass.mesh.getWorldPosition(target);
-    bullet.setPosition(target);
-    scene.add(bullet.mesh);
-    bullets.push(bullet);
-    // -------------
-    // let shoot = new THREE.Mesh(espgeometry, espmaterial);
-    // planeClass.mesh.getWorldPosition(target);
-    // shoot.position.set(target.x,target.y,target.z);
-    // // shoot.geometry.computeBoundingBox();
-    // scene.add(shoot);
-    // shoot.geometry.computeBoundingBox();
-    // bullets.push(shoot);
-}
-
-function createEnemyShoot() {
-
-    // let cooldown = false
-    enemyVector.forEach(enemy => {
-        if(enemy.isShooting == true && !enemy.bulletCooldown) {
-            enemy.bulletCooldown = true;
-            setTimeout( () => enemy.bulletCooldown = false, 3000);
-            let bullet = new Bullet();
-            enemy.mesh.getWorldPosition(target);
-            bullet.setPosition(target);
-            scene.add(bullet.mesh);
-            enemy.bullets.push(bullet);
-        }
-    });
-}
-
-// Função para mover os tiros para frente
-function moveBullets() {
-    bullets.forEach(item => {
-        item.mesh.translateZ(-1);
-    });
-}
-
-// Função para deletar os tiros a partir de uma posição
-function deleteBullets() {
-    bullets.forEach(item => {
-        item.mesh.updateMatrixWorld(true);
-        if(item.mesh.position.z == -185) {
-            scene.remove(item.mesh);
-            let id = bullets.indexOf(item);
-            bullets.splice(id, 1);
-        }
-    });
-}
- //********************************************//
 
 //********************************************//
 // Criando Adversários
-// var adversarios = [];
 var enemyVector = [];
-// var velocidades = [];
-// var cubeGeometry = new THREE.BoxGeometry(10, 10, 10);
-// var cubeMaterial = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
 
 // função para limitar quantos inimigos tem na tela
 function chamaAdversario(){
@@ -179,63 +104,46 @@ function vertical(){
 //********************************************//
 
 //********************************************//
-/**
- * Colisão en
-      // aviaoBox = box3.copy(cone.geometry.boundingBox).applyMatrix4(cone.matrixWorld);tre tiro e inimigo e animção
- */
 const box = new THREE.Box3();
 const box2 = new THREE.Box3();
 const box3 = new THREE.Box3();
-// var enemyBox;
-// var bulletBox;
 var acertouaviao = false;
-var aux = new THREE.Mesh();
 
 /**
  * Função para validar se ocorreu colisão entre os tiros e os inimigos.
  * Caso ocorra uma colisão o tiro e o inimigo são removidos da tela.
  */
-function colisionPlane(){
+function colisionPlaneEnemy(){
     enemyVector.forEach(enemy => {
         let planeBox = box3.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
         let enemyBox = box.copy(enemy.getBoundingBox()).applyMatrix4(enemy.mesh.matrixWorld);
         if(enemyBox.containsBox(planeBox) || enemyBox.intersectsBox(planeBox)) {
-            // let x = aux.copy(enemy.mesh);
             acertouaviao = true;
-            enemy.setIsDead();
-            // enemiesAnimation.push(x);
-            let id2 = enemyVector.indexOf(enemy);
-            // enemyVector.splice(id2, 1);
-            // scene.remove(enemy.mesh);
+            enemy.deleteAllBullets(scene);
+            enemy.setIsDead(scene);
         }
     });
 }
 
-function colision() {
+// Bug -> não deleta todos os tiros de um inimigo da tela
+function colisionBulletEnemy() {
+    let bullets = planeClass.getBullets();
     enemyVector.forEach(enemy => {
         let enemyBox = box.copy(enemy.getBoundingBox()).applyMatrix4(enemy.mesh.matrixWorld);
         bullets.forEach(bullet => {
             let bulletBox = box2.copy(bullet.getBoundingBox()).applyMatrix4( bullet.mesh.matrixWorld )
             if(enemyBox.containsBox(bulletBox) || enemyBox.intersectsBox(bulletBox)) {
-                let idShoot = bullets.indexOf(bullet);
-                // let idEnemy = enemyVector.indexOf(enemy);
-                // let x = aux.copy(enemy.mesh);
-                enemy.setIsDead();
-                // enemiesAnimation.push(x);
-                // scene.remove(enemy.mesh);
-                scene.remove(bullet.mesh);
-                bullets.splice(idShoot, 1);
-                // enemyVector.splice(idEnemy, 1);
+                planeClass.deleteOneBullet(bullet, scene);
+                enemy.deleteAllBullets(scene);
+                enemy.setIsDead(scene);
             }
         });
     });
 }
-
 /**
  * Para efetuar a animação dos inimigos
  */
 // var enemiesAnimation = [];
-
 function removePlane(){
     if(planeClass.mesh.scale.x>=0){
         planeClass.mesh.scale.x -=.1;
@@ -249,29 +157,7 @@ function removePlane(){
     }
 }
 
-// function excluirInimgo(id){
-//     enemiesAnimation.forEach(item => {
-//         if(enemiesAnimation.indexOf(item) == id){
-//             scene.remove(item);
-//             enemiesAnimation.splice(id,1);
-//         }
-//     })
-// }
-
 function animation() {
-    // enemiesAnimation.forEach(item => {
-    //     scene.add(item);
-    //     item.rotation.y += 0.1;
-    //     item.rotation.x += 0.1;
-    //     if(item.scale.x>=0){
-    //         item.scale.x -=.1;
-    //         item.scale.y -=.1;
-    //         item.scale.z -=.1;
-    //     }
-    //     if(item.scale.x <= 0)
-    //         excluirInimgo(enemiesAnimation.indexOf(item));
-    // })
-
     enemyVector.forEach(enemy => {
         if(enemy.isDead == true){
             console.log("dead");
@@ -290,10 +176,12 @@ function animation() {
         }
     })
 }
+
 //********************************************//
 
 //********************************************//
-let cooldown = false;
+let cooldownBullet = false;
+let cooldownMissile = false;
 //Função para usar as teclas
 function keyboardUpdate() {
     keyboard.update();
@@ -317,12 +205,16 @@ function keyboardUpdate() {
         if(target.x >= -95)
         planeHolder.translateX(-moveDistance);
     }
-    if (keyboard.pressed("ctrl") && !cooldown){
-        createShoot();
-        cooldown = true;
-        setTimeout( () => cooldown = false, 500);
+    if (keyboard.pressed("ctrl") && !cooldownBullet){
+        planeClass.createShoot(scene);
+        cooldownBullet = true;
+        setTimeout( () => cooldownBullet = false, 500);
     }
-    if (keyboard.down("space")) createShoot();
+    if (keyboard.down("space") && !cooldownMissile){
+        planeClass.createMissiles(scene);
+        cooldownMissile = true;
+        setTimeout( () => cooldownMissile = false, 800);
+    }
 }
 //********************************************//
 
@@ -342,17 +234,31 @@ function render() {
     stats.update();
     onWindowResize();
     keyboardUpdate();
-    createEnemyShoot();
-    moveBullets();
-    deleteBullets();
+
     moverPlanos();
+
+    planeClass.moveBullets();
+    planeClass.moveMissiles();
+    planeClass.deleteBullets(scene);
+    planeClass.deleteMissiles(scene);
+
     chamaAdversario();
     movimentarAdversario();
-    colision();
-    colisionPlane();
+
+    enemyVector.forEach(element => {
+        element.createEnemyShoot(scene);
+        element.moveBullets();
+        if(element.getPositionZ() > 45) {
+            element.deleteAllBullets(scene);
+        }
+    });
+
+    colisionBulletEnemy();
+    colisionPlaneEnemy();
     animation();
+
+    if(acertouaviao) removePlane();
+
     requestAnimationFrame(render);
-    if(acertouaviao)
-        removePlane();
     renderer.render(scene, camera) // Render scene
 }
