@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import Stats from '../build/jsm/libs/stats.module.js';
 import {ConvexGeometry} from '../build/jsm/geometries/ConvexGeometry.js';
+import { GLTFLoader } from '../../build/jsm/loaders/GLTFLoader.js';
+
 import KeyboardState from '../libs/util/KeyboardState.js'
 import {
     onWindowResize,
@@ -48,7 +50,6 @@ function setDirectionalLighting(position) {
     scene.add(dirLight);
 }
 //********************************************//
-
 //********************************************//
 //Criando a camera
 var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300);
@@ -83,9 +84,34 @@ function moverPlanos() {
 var keyboard = new KeyboardState();
 //********************************************//
 //Criando o avião
-const planeClass = new Plane();
+var loader = new GLTFLoader();
+var obj;
+var mesh;
+const xx = loader.load('./assets/Airplane.glb', function (gltf) {
+    obj = gltf.scene;
+    console.log(gltf)
+    mesh = obj.children;
+    obj.name = 'airplane';
+    console.log(mesh);
+    obj.visible = true;
+    obj.traverse(function (child) {
+        if (child) {
+            child.castShadow = true;
+        }
+    });
+}, onProgress, onError);
+
+function onError() { };
+
+function onProgress(xhr, model) {
+    if (xhr.lengthComputable) {
+        var percentComplete = xhr.loaded / xhr.total * 100;
+    }
+}
+console.log(xx)
+const planeClass = new Plane(obj);
 var planeHolder = new THREE.Object3D();
-planeHolder.add(planeClass.mesh);
+planeHolder.add(loader);
 scene.add(planeHolder);
 //********************************************//
 var target = new THREE.Vector3();
@@ -347,27 +373,6 @@ render();
 
 document.getElementById("webgl-output").appendChild(stats.domElement);//Pra mostrar o FPS
 
-// var loader = new GLTFLoader();
-// loader.load('../assets/objects/Airplane.glb', function (gltf) {
-//     var obj = gltf.scene;
-//     obj.name = 'airplane';
-//     obj.visible = true;
-//     obj.traverse(function (child) {
-//         if (child) {
-//             child.castShadow = true;
-//         }
-//     });
-
-//     scene.add(obj);
-// }, onProgress, onError);
-
-// function onError() { };
-
-// function onProgress(xhr, model) {
-//     if (xhr.lengthComputable) {
-//         var percentComplete = xhr.loaded / xhr.total * 100;
-//     }
-// }
 
 function render() {
     stats.update();
