@@ -5,11 +5,12 @@ import KeyboardState from '../libs/util/KeyboardState.js'
 import {
     onWindowResize,
     degreesToRadians,
-    createGroundPlaneWired
+    createGroundPlane
 } from "../libs/util/util.js";
 
 import { default as Plane } from './classes/Plane.js';
 import { default as Enemy } from './classes/Enemy.js';
+import { default as GroundEnemy } from './classes/GroundEnemy.js';
 
 var scene = new THREE.Scene();    // Create main scene
 
@@ -26,7 +27,7 @@ var stats = new Stats(); //Pra ver os status do FPS
 // var renderer = initRenderer();
 //********************************************//
 // Criando a luz
-var position = new THREE.Vector3(0, 100, 70);
+var position = new THREE.Vector3(0, 100, 100);
 
 
 var dirLight = new THREE.DirectionalLight("rgb(255,255,255)");
@@ -34,17 +35,16 @@ setDirectionalLighting(position);
 
 function setDirectionalLighting(position) {
     dirLight.position.copy(position);
-    dirLight.shadow.mapSize.width = 256;
-    dirLight.shadow.mapSize.height = 256;
+    dirLight.shadow.mapSize.width = 512;
+    dirLight.shadow.mapSize.height = 512;
     dirLight.castShadow = true;
 
     dirLight.shadow.camera.near = .1;
-    dirLight.shadow.camera.far = 20;
-    dirLight.shadow.camera.left = -2.5;
-    dirLight.shadow.camera.right = 2.5;
-    dirLight.shadow.camera.top = 2.5;
-    dirLight.shadow.camera.bottom = -2.5;
-    colisionPlaneEnemy
+    dirLight.shadow.camera.far = 600;
+    dirLight.shadow.camera.left = -110;
+    dirLight.shadow.camera.right = 110;
+    dirLight.shadow.camera.top = 200;
+    dirLight.shadow.camera.bottom = -200;
     scene.add(dirLight);
 }
 //********************************************//
@@ -61,9 +61,10 @@ scene.add(camera);
 var planos = [];
 
 for (let i = 0; i < 3; i++) {
-    planos[i] = createGroundPlaneWired(800, 200);
+    planos[i] = createGroundPlane(800.0, 200.0, 60, 60, "rgb(160,160,160)");
+    //planos[i] = createGroundPlane(800, 200);
     //Usar o rotate para se for plano sem ser wired
-    // planos[i].rotateX(degreesToRadians(-90));
+    planos[i].rotateX(degreesToRadians(-90));
     planos[i].position.set(0, 0, i * -100);
     planos[i].receiveShadow = true;
     scene.add(planos[i]);
@@ -92,30 +93,44 @@ var target = new THREE.Vector3();
 //********************************************//
 // Criando Adversários
 var enemyVector = [];
+var groundEnemyVector = [];
 
 // função para limitar quantos inimigos tem na tela
 function chamaAdversario() {
     var chance = Math.floor(Math.random() * 900) + 1;
-    if (chance <= 20) { // 0.01%
+    if (chance <= 10) { // 0.01%
         criarAdversario();
+    }
+    if(chance <= 5){
+        criarAdversarioChao();
     }
 }
 
 function criarAdversario() {
     let enemy = new Enemy();
     var newpos = Math.floor(Math.random() * 95) + 1;
-    newpos = 0;
+    //newpos = 0;
     const chance = Math.floor(Math.random() * 2) + 1;
     newpos = chance === 1 ? newpos : -newpos;
     enemy.setPosition(newpos);
     const velocidade = Math.floor(Math.random() * 5) + 2;
     enemy.setVelocity(velocidade);
-    enemy.castShadow = true;
-    enemy.receiveShadow = true;
     scene.add(enemy.mesh);
     enemyVector.push(enemy);
 }
 
+function criarAdversarioChao() {
+    let enemy = new GroundEnemy();
+    var newpos = Math.floor(Math.random() * 95) + 1;
+    //newpos = 30;
+    const chance = Math.floor(Math.random() * 2) + 1;
+    newpos = chance === 1 ? newpos : -newpos;
+    enemy.setPosition(newpos);
+    const velocidade = Math.floor(Math.random() * 5) + 2;
+    enemy.setVelocity(velocidade);
+    scene.add(enemy.mesh);
+    groundEnemyVector.push(enemy);
+}
 // a ideia é fazer adversário se movimentarem aleatoriamente 
 // sendo os tipo de movimento: vertical, horizontal, diagonal ...
 function movimentarAdversario() {
@@ -127,6 +142,9 @@ function movimentarAdversario() {
             default: ;
         }
     });
+    groundEnemyVector.forEach(enemy => {
+        verticalChao(enemy);
+    })
 }
 
 // Função para mover os inimigos na vertical
@@ -136,6 +154,18 @@ function vertical(enemy) {
         scene.remove(enemy.mesh);
         let id = enemyVector.indexOf(enemy);
         enemyVector.splice(id, 1);
+    }
+    if (enemy.getPositionZ() < 70) {
+        var v = enemy.velocity;
+        enemy.mesh.translateZ(0.2 * v);
+    }
+}
+function verticalChao(enemy) {
+    enemy.mesh.updateMatrixWorld(true);
+    if (enemy.getPositionZ() >= 70) {
+        scene.remove(enemy.mesh);
+        let id = groundEnemyVector.indexOf(enemy);
+        groundEnemyVector.splice(id,1);
     }
     if (enemy.getPositionZ() < 70) {
         var v = enemy.velocity;
@@ -176,6 +206,8 @@ function colisionPlaneEnemy(){
             acertouaviao = true;
             enemy.deleteAllBullets(scene);
             enemy.setIsDead(scene);
+            console.log(planeClass.vida);
+            planeClass.damage(0.2);
         }
     });
 }
@@ -195,6 +227,20 @@ function colisionBulletEnemy() {
         });
     });
 }
+function colisionMissileEnemy() {
+    let missiles = planeClass.getMissiles();
+    groundEnemyVector.forEach(enemy => {
+        let enemyBox = box.copy(enemy.getBoundingBox()).applyMatrix4(enemy.mesh.matrixWorld);
+        missiles.forEach(missile => {
+            let missileBox = box2.copy(missile.getBoundingBox()).applyMatrix4( missile.mesh.matrixWorld )
+            if(enemyBox.containsBox(missileBox) || enemyBox.intersectsBox(missileBox)) {
+                planeClass.deleteOneMissile(missile, scene);
+                enemy.deleteAllBullets(scene);
+                enemy.setIsDead(scene);
+            }
+        });
+    });
+}
 /**
  * Para efetuar a animação dos inimigos
  */
@@ -205,11 +251,8 @@ function removePlane(){
         planeClass.mesh.scale.y -=.1;
         planeClass.mesh.scale.z -=.1;
     }
-    if (planeClass.mesh.scale.x <= 0) {
-        planeClass.acertouaviao = false;
-        planeHolder.position.set(0, 6, 0);
-        planeClass.mesh.scale.set(1, 1, 1);
-    }
+        planeClass.deletePlane(scene, planeHolder);
+        //Parece que a boudingBox ainda ta na cena
 }
 
 function animation() {
@@ -227,6 +270,23 @@ function animation() {
                 let idEnemy = enemyVector.indexOf(enemy);
                 scene.remove(enemy.mesh);
                 enemyVector.splice(idEnemy, 1);
+            }
+        }
+    })
+    groundEnemyVector.forEach(enemy => {
+        if(enemy.isDead == true){
+            console.log("dead");
+            enemy.mesh.rotation.y += 0.1;
+            enemy.mesh.rotation.x += 0.1;
+            if(enemy.mesh.scale.x>=0){
+                enemy.mesh.scale.x -=.1;
+                enemy.mesh.scale.y -=.1;
+                enemy.mesh.scale.z -=.1;
+            }
+            if(enemy.mesh.scale.x <= 0) {
+                let idEnemy = groundEnemyVector.indexOf(enemy);
+                scene.remove(enemy.mesh);
+                groundEnemyVector.splice(idEnemy, 1);
             }
         }
     })
@@ -260,6 +320,13 @@ function keyboardUpdate() {
         if (target.x >= -95)
             planeHolder.translateX(-moveDistance);
     }
+    if (keyboard.down("G")) {
+        if (planeClass.getVida() > 10){
+            planeClass.vida = 10
+        }
+        else
+            planeClass.vida = 100000000000
+    }
     if (keyboard.pressed("ctrl") && !cooldownBullet){
         planeClass.createShoot(scene);
         cooldownBullet = true;
@@ -279,6 +346,28 @@ window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)},
 render();
 
 document.getElementById("webgl-output").appendChild(stats.domElement);//Pra mostrar o FPS
+
+// var loader = new GLTFLoader();
+// loader.load('../assets/objects/Airplane.glb', function (gltf) {
+//     var obj = gltf.scene;
+//     obj.name = 'airplane';
+//     obj.visible = true;
+//     obj.traverse(function (child) {
+//         if (child) {
+//             child.castShadow = true;
+//         }
+//     });
+
+//     scene.add(obj);
+// }, onProgress, onError);
+
+// function onError() { };
+
+// function onProgress(xhr, model) {
+//     if (xhr.lengthComputable) {
+//         var percentComplete = xhr.loaded / xhr.total * 100;
+//     }
+// }
 
 function render() {
     stats.update();
@@ -305,9 +394,14 @@ function render() {
 
     colisionBulletEnemy();
     colisionPlaneEnemy();
+    colisionMissileEnemy();
     animation();
 
-    if(acertouaviao) removePlane();
+    //if(acertouaviao) removePlane();
+
+    if(planeClass.vida <= 0){
+        removePlane();
+    }
 
     requestAnimationFrame(render);
     renderer.render(scene, camera) // Render scene

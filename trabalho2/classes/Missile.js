@@ -15,6 +15,8 @@ export default class Missile {
       this.boundingBox
          .copy(this.mesh.geometry.boundingBox)
          .applyMatrix4(this.mesh.matrixWorld);
+         this.mesh.castShadow = true;
+         this.mesh.receiveShadow = true;
    }
 
    setPosition(target) {
@@ -27,5 +29,8 @@ export default class Missile {
 
    getPositionY() {
       return this.mesh.position.y;
+   }
+   getBoundingBox() {
+      return this.boundingBox;
    }
 }

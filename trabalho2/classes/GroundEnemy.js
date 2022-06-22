@@ -3,7 +3,7 @@ import { default as Bullet } from './Bullet.js';
 
 export default class Plane {
    // Private
-   #geometry = new THREE.BoxGeometry(10, 10, 10);
+   #geometry = new THREE.SphereGeometry( 7, 32, 16 );
    #material = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
    // Public
    mesh;
@@ -32,7 +32,7 @@ export default class Plane {
    }
 
    setPosition(newpos) {
-      this.mesh.position.set(newpos,20,-200);
+      this.mesh.position.set(newpos,6,-200);
    }
 
    setVelocity(vel) {
@@ -87,5 +87,4 @@ export default class Plane {
          array.splice(id, 1);
       })
    }
-   
 }

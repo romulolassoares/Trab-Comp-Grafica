@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { default as Bullet } from './Bullet.js';
 import { default as Missile } from './Missile.js';
+import { GLTFLoader } from '../../build/jsm/loaders/GLTFLoader.js';
 
 export default class Plane {
    // Private
@@ -12,10 +13,24 @@ export default class Plane {
    bullets;
    missiles;
    target;
-
+   vida;
+   
+   
    constructor() {
+      // var loader = new GLTFLoader();
+      // loader.load('../assets/objects/Airplane.glb', function (gltf) {
+      //  var mesh = gltf.scene;
+      //  mesh.name = 'airplane';
+      //  mesh.visible = true;
+      //  mesh.traverse(function (child) {
+      //      if (child) {
+      //          child.castShadow = true;
+      //      }
+      //  });
+      // }, onProgress, onError);
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
       this.mesh.position.set(0,16,0);
+      this.mesh.castShadow = true;
       this.mesh.rotateX(-1.6);
       this.mesh.geometry.computeBoundingBox();
       this.boundingBox
@@ -24,6 +39,7 @@ export default class Plane {
       this.bullets = [];
       this.missiles = [];
       this.target = new THREE.Vector3();
+      this.vida = 10;
    }
 
    getBoundingBox() {
@@ -32,6 +48,9 @@ export default class Plane {
 
    getBullets() {
       return this.bullets;
+   }
+   getMissiles() {
+      return this.missiles;
    }
 
    // Função para criar um tiro
@@ -94,4 +113,29 @@ export default class Plane {
       })
    }
 
+   deleteOneMissile(missile, scene) {
+      let id = this.missiles.indexOf(missile);
+      scene.remove(missile.mesh);
+      this.missiles.splice(id, 1);
+   }
+
+   damage(dano){
+      this.vida -= dano;
+   }
+
+   deletePlane(scene,planeHolder){
+      scene.remove(this.mesh);
+      scene.remove(this.boundingbox);
+      scene.remove(planeHolder);
+   }
+   getVida(){
+      return this.vida;
+   }
+   onError() { };
+   
+   onProgress(xhr, model) {
+       if (xhr.lengthComputable) {
+           var percentComplete = xhr.loaded / xhr.total * 100;
+       }
+   }
 }

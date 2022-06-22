@@ -12,6 +12,8 @@ export default class Bullet {
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
       this.mesh.geometry.computeBoundingBox();
       this.boundingBox.copy(this.mesh.geometry.boundingBox).applyMatrix4(this.mesh.matrixWorld);
+      this.mesh.castShadow = true;
+      this.mesh.receiveShadow = true;
    }
 
    setPosition(target) {
