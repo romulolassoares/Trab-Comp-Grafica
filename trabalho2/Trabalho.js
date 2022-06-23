@@ -135,12 +135,14 @@ function criarAdversarioChao() {
 // sendo os tipo de movimento: vertical, horizontal, diagonal ...
 function movimentarAdversario() {
     enemyVector.forEach(enemy => {
-        enemy.movimentation = Math.floor(Math.random() * 2);
-        switch (enemy.movimentation) {
-            case 0: vertical(enemy);
-            // case 1: diagonal(enemy);
-            default: ;
+        if(enemy.moveType === 0) {
+            vertical(enemy);
+        } else if(enemy.moveType === 1) {
+            diagonal(enemy);
+        } else if(enemy.moveType === 2) {
+            // verticalAndStop(enemy);
         }
+        // diagonal(enemy);
     });
     groundEnemyVector.forEach(enemy => {
         verticalChao(enemy);
@@ -153,13 +155,33 @@ function vertical(enemy) {
     if (enemy.getPositionZ() >= 70) {
         scene.remove(enemy.mesh);
         let id = enemyVector.indexOf(enemy);
-        enemyVector.splice(id, 1);
+        // enemyVector.splice(id, 1);
     }
     if (enemy.getPositionZ() < 70) {
-        var v = enemy.velocity;
-        enemy.mesh.translateZ(0.2 * v);
+        enemy.verticalMove();
     }
 }
+
+function verticalAndStop(enemy) {
+    enemy.mesh.updateMatrixWorld(true);
+    if (enemy.getPositionZ() >= 70) {
+        scene.remove(enemy.mesh);
+        let id = enemyVector.indexOf(enemy);
+        enemyVector.splice(id, 1);
+    }
+    if (enemy.getPositionZ() < -30) {
+        enemy.verticalMove();
+    }
+    if(enemy.getPositionX() >= 95 || enemy.getPositionX() < -95) {
+        enemy.dir = -enemy.dir
+    }
+    if(enemy.getPositionZ() >= -30) {
+        var v = enemy.velocity;
+        var x = enemy.dir;
+        enemy.mesh.translateX(0.2 * v * x);
+    }
+}
+
 function verticalChao(enemy) {
     enemy.mesh.updateMatrixWorld(true);
     if (enemy.getPositionZ() >= 70) {
@@ -175,15 +197,19 @@ function verticalChao(enemy) {
 
 function diagonal(enemy) {
     enemy.mesh.updateMatrixWorld(true);
-    if (enemy.getPositionZ() >= 70 && enemy.getPositionX() >= 95) {
+    if (enemy.getPositionZ() >= 70) {
         scene.remove(enemy.mesh);
         let id = enemyVector.indexOf(enemy);
         enemyVector.splice(id, 1);
     }
-    if (enemy.getPositionX() < 95 || enemy.getPositionZ() < 70) {
+    if(enemy.getPositionX() >= 95 || enemy.getPositionX() < -95) {
+        enemy.dir = -enemy.dir
+    }
+    if (enemy.getPositionZ() < 70) {
         var v = enemy.velocity;
+        var x = enemy.dir;
         enemy.mesh.translateZ(0.2 * v);
-        enemy.mesh.translateX(0.2 * v);
+        enemy.mesh.translateX(0.2 * v * x);
     }
 }
 //********************************************//
@@ -207,7 +233,7 @@ function colisionPlaneEnemy(){
             enemy.deleteAllBullets(scene);
             enemy.setIsDead(scene);
             console.log(planeClass.vida);
-            planeClass.damage(0.2);
+            planeClass.damage(10);
         }
     });
 }
@@ -252,6 +278,8 @@ function removePlane(){
         planeClass.mesh.scale.z -=.1;
     }
         planeClass.deletePlane(scene, planeHolder);
+        // planeHolder.geometry.dispose();
+        scene.remove(planeHolder);
         //Parece que a boudingBox ainda ta na cena
 }
 

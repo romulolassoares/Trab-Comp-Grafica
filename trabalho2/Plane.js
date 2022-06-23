@@ -9,6 +9,7 @@ export default class Plane {
    boundingBox = new THREE.Box3();
    acertouaviao;
    vida;
+   // isMortal = true;
 
    constructor() {
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);

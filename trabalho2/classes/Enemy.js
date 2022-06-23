@@ -15,6 +15,8 @@ export default class Plane {
    bulletCooldown;
    canShoot;
    target;
+   moveType;
+   dir;
 
    constructor() {
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
@@ -29,10 +31,12 @@ export default class Plane {
       this.target = new THREE.Vector3();
       this.mesh.castShadow = true;
       this.mesh.receiveShadow = true;
+      this.moveType = Math.floor(Math.random() * 3);
+      this.dir = 1;
    }
 
    setPosition(newpos) {
-      this.mesh.position.set(newpos,20,-200);
+      this.mesh.position.set(newpos,16,-200);
    }
 
    setVelocity(vel) {
@@ -88,4 +92,16 @@ export default class Plane {
       })
    }
    
+   move() {
+      switch (this.moveType) {
+         // case 0: vertical(enemy);
+         // case 1: diagonal(enemy);
+         default: ;
+      }
+   }
+
+   verticalMove() {
+      this.mesh.translateZ(0.2 * this.velocity);
+   }
+   diagonalMove() {}
 }
