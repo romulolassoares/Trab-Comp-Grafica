@@ -1,8 +1,6 @@
 import * as THREE from 'three';
 import Stats from '../build/jsm/libs/stats.module.js';
-import {ConvexGeometry} from '../build/jsm/geometries/ConvexGeometry.js';
 import { GLTFLoader } from '../../build/jsm/loaders/GLTFLoader.js';
-
 import KeyboardState from '../libs/util/KeyboardState.js'
 import {
     onWindowResize,
@@ -112,7 +110,7 @@ var keyboard = new KeyboardState();
 // console.log(xx)
 const planeClass = new Plane();
 var planeHolder = new THREE.Object3D();
-planeHolder.add(planeClass);
+planeHolder.add(planeClass.mesh);
 scene.add(planeHolder);
 //********************************************//
 var target = new THREE.Vector3();
@@ -308,6 +306,7 @@ function colisionCuraPlane() {
         let curaBox = box.copy(cura.getBoundingBox()).applyMatrix4(cura.mesh.matrixWorld);
         if(curaBox.containsBox(planeBox) || curaBox.intersectsBox(planeBox)) {
             planeClass.recover(1);
+            cura.delete(scene,curaVector);
         }
     });
 }

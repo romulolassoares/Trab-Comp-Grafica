@@ -7,7 +7,7 @@ export default class Plane {
    // Private
    #geometry = new THREE.ConeGeometry(5, 15, 64);
    #material = new THREE.MeshLambertMaterial({color:'rgb(180,180,255)'});
-   loader = new GLTFLoader();
+   //loader = new GLTFLoader();
    // Public
    mesh;
    boundingBox = new THREE.Box3();

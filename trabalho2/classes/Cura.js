@@ -69,4 +69,12 @@ export default class Cura {
         return this.mesh.position.y;
     }
 
+    delete(scene, curaVector){
+        curaVector.forEach(element => {
+            scene.remove(element.mesh);
+            let id = curaVector.indexOf(element);
+            console.log(id);
+            curaVector.splice(id, 1);
+        })
+    }
 }
