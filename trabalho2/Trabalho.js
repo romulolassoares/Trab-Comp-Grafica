@@ -124,17 +124,17 @@ var curaVector = [];
 // função para limitar quantos inimigos tem na tela
 function chamaAdversario() {
     var chance = Math.floor(Math.random() * 900) + 1;
-    if (chance <= -10) { // 0.01%
+    if (chance <= 10) { // 0.01%
         criarAdversario();
     }
-    if(chance <= -5){
+    if(chance <= 5){
         criarAdversarioChao();
     }
 }
 
 function chamaCura(){
     var chance = Math.floor(Math.random() * 900) + 1;
-    if (chance <= 10) { // 0.01%
+    if (chance <= 100) { // 0.01%
         criarCura();
     }
 }
@@ -306,7 +306,8 @@ function colisionCuraPlane() {
         let curaBox = box.copy(cura.getBoundingBox()).applyMatrix4(cura.mesh.matrixWorld);
         if(curaBox.containsBox(planeBox) || curaBox.intersectsBox(planeBox)) {
             planeClass.recover(1);
-            cura.delete(scene,curaVector);
+            let id = curaVector.indexOf(cura);
+            cura.delete(scene,id, curaVector);
         }
     });
 }
