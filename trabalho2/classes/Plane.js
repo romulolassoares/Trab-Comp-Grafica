@@ -7,6 +7,7 @@ export default class Plane {
    // Private
    #geometry = new THREE.ConeGeometry(5, 15, 64);
    #material = new THREE.MeshLambertMaterial({color:'rgb(180,180,255)'});
+   loader = new GLTFLoader();
    // Public
    mesh;
    boundingBox = new THREE.Box3();
@@ -17,18 +18,25 @@ export default class Plane {
    
    
    constructor() {
-      // var loader = new GLTFLoader();
-      // loader.load('../assets/objects/Airplane.glb', function (gltf) {
-      //  var mesh = gltf.scene;
-      //  mesh.name = 'airplane';
-      //  mesh.visible = true;
-      //  mesh.traverse(function (child) {
+      // this.loader.load('./assets/ToonTank.glb', function (gltf) {
+      //  this.mesh = gltf.asset;    
+      //  this.mesh.visible = true;
+      //  this.mesh.traverse(function (child) {
       //      if (child) {
       //          child.castShadow = true;
+      //          child.receiveShadow = true;
       //      }
       //  });
-      // }, onProgress, onError);
+      // }, 
+      // function onError() { }, 
+      // function onProgress(xhr, model) {
+      //     if (xhr.lengthComputable) {
+      //         var percentComplete = xhr.loaded / xhr.total * 100;
+      //     }
+      // });
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
+      console.log(this.mesh);
+      //this.mesh = aviao;
       this.mesh.position.set(0,16,0);
       this.mesh.castShadow = true;
       this.mesh.rotateX(-1.6);
@@ -132,11 +140,5 @@ export default class Plane {
    getVida(){
       return this.vida;
    }
-   onError() { };
    
-   onProgress(xhr, model) {
-       if (xhr.lengthComputable) {
-           var percentComplete = xhr.loaded / xhr.total * 100;
-       }
-   }
 }

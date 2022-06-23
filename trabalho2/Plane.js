@@ -20,7 +20,7 @@ export default class Plane {
       this.mesh.receiveShadow = true;
       this.boundingBox.copy(this.mesh.geometry.boundingBox).applyMatrix4(this.mesh.matrixWorld);
       this.acertouaviao = false;
-      this.vida = 10;
+      this.vida = 1000000;
    }
 
    getBoundingBox() {

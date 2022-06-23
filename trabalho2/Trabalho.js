@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import Stats from '../build/jsm/libs/stats.module.js';
 import {ConvexGeometry} from '../build/jsm/geometries/ConvexGeometry.js';
+import { GLTFLoader } from '../../build/jsm/loaders/GLTFLoader.js';
+
 import KeyboardState from '../libs/util/KeyboardState.js'
 import {
     onWindowResize,
@@ -48,7 +50,6 @@ function setDirectionalLighting(position) {
     scene.add(dirLight);
 }
 //********************************************//
-
 //********************************************//
 //Criando a camera
 var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300);
@@ -83,7 +84,32 @@ function moverPlanos() {
 var keyboard = new KeyboardState();
 //********************************************//
 //Criando o avião
-const planeClass = new Plane();
+var loader = new GLTFLoader();
+var obj;
+var mesh;
+const xx = loader.load('./assets/Airplane.glb', function (gltf) {
+    obj = gltf.scene;
+    console.log(gltf)
+    mesh = obj.children;
+    obj.name = 'airplane';
+    console.log(mesh);
+    obj.visible = true;
+    obj.traverse(function (child) {
+        if (child) {
+            child.castShadow = true;
+        }
+    });
+}, onProgress, onError);
+
+function onError() { };
+
+function onProgress(xhr, model) {
+    if (xhr.lengthComputable) {
+        var percentComplete = xhr.loaded / xhr.total * 100;
+    }
+}
+console.log(xx)
+const planeClass = new Plane(obj);
 var planeHolder = new THREE.Object3D();
 planeHolder.add(planeClass.mesh);
 scene.add(planeHolder);
@@ -98,10 +124,10 @@ var groundEnemyVector = [];
 // função para limitar quantos inimigos tem na tela
 function chamaAdversario() {
     var chance = Math.floor(Math.random() * 900) + 1;
-    if (chance <= 10) { // 0.01%
+    if (chance <= 900) { // 0.01%
         criarAdversario();
     }
-    if(chance <= 5){
+    if(chance <= 1){
         criarAdversarioChao();
     }
 }
@@ -135,14 +161,16 @@ function criarAdversarioChao() {
 // sendo os tipo de movimento: vertical, horizontal, diagonal ...
 function movimentarAdversario() {
     enemyVector.forEach(enemy => {
-        if(enemy.moveType === 0) {
-            vertical(enemy);
-        } else if(enemy.moveType === 1) {
-            diagonal(enemy);
-        } else if(enemy.moveType === 2) {
-            // verticalAndStop(enemy);
-        }
+        // if(enemy.moveType === 0) {
+        //     vertical(enemy);
+        // } else if(enemy.moveType === 1) {
+        //     diagonal(enemy);
+        // } else if(enemy.moveType === 2) {
+        //     verticalAndStop(enemy);
+        // }
         // diagonal(enemy);
+        // verticalAndStop(enemy);
+        moveRotate(enemy);
     });
     groundEnemyVector.forEach(enemy => {
         verticalChao(enemy);
@@ -164,7 +192,7 @@ function vertical(enemy) {
 
 function verticalAndStop(enemy) {
     enemy.mesh.updateMatrixWorld(true);
-    if (enemy.getPositionZ() >= 70) {
+    if (enemy.getPositionZ() >= 70 || enemy.getPositionX() > 120 || enemy.getPositionX() < -120) {
         scene.remove(enemy.mesh);
         let id = enemyVector.indexOf(enemy);
         enemyVector.splice(id, 1);
@@ -173,12 +201,17 @@ function verticalAndStop(enemy) {
         enemy.verticalMove();
     }
     if(enemy.getPositionX() >= 95 || enemy.getPositionX() < -95) {
-        enemy.dir = -enemy.dir
+        enemy.dir = -enemy.dir;
+        enemy.timeAlive--;
     }
-    if(enemy.getPositionZ() >= -30) {
+    if(enemy.getPositionZ() >= -40) {
         var v = enemy.velocity;
         var x = enemy.dir;
-        enemy.mesh.translateX(0.2 * v * x);
+        if(enemy.timeAlive > 0){
+            enemy.mesh.translateX(0.2 * v * x);
+        } else {
+            enemy.mesh.translateX(0.2 * v);
+        }
     }
 }
 
@@ -210,6 +243,28 @@ function diagonal(enemy) {
         var x = enemy.dir;
         enemy.mesh.translateZ(0.2 * v);
         enemy.mesh.translateX(0.2 * v * x);
+    }
+}
+
+
+const path = new THREE.Path();
+path.absarc(0, 90, degreesToRadians(2360), degreesToRadians(0), degreesToRadians(180), true)
+const points = path.getPoints();
+
+const geometry = new THREE.BufferGeometry().setFromPoints( points );
+const material = new THREE.LineBasicMaterial( { color: 0xffffff } );
+
+const line = new THREE.Line( geometry, material );
+scene.add( line );
+function moveRotate(enemy) {
+    enemy.mesh.updateMatrixWorld(true);
+    if (enemy.getPositionZ() >= 70) {
+        scene.remove(enemy.mesh);
+        let id = enemyVector.indexOf(enemy);
+        // enemyVector.splice(id, 1);
+    }
+    if (enemy.getPositionZ() < 70) {
+        enemy.rotateMove(path);
     }
 }
 //********************************************//
@@ -375,27 +430,6 @@ render();
 
 document.getElementById("webgl-output").appendChild(stats.domElement);//Pra mostrar o FPS
 
-// var loader = new GLTFLoader();
-// loader.load('../assets/objects/Airplane.glb', function (gltf) {
-//     var obj = gltf.scene;
-//     obj.name = 'airplane';
-//     obj.visible = true;
-//     obj.traverse(function (child) {
-//         if (child) {
-//             child.castShadow = true;
-//         }
-//     });
-
-//     scene.add(obj);
-// }, onProgress, onError);
-
-// function onError() { };
-
-// function onProgress(xhr, model) {
-//     if (xhr.lengthComputable) {
-//         var percentComplete = xhr.loaded / xhr.total * 100;
-//     }
-// }
 
 function render() {
     stats.update();
