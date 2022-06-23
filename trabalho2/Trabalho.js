@@ -13,6 +13,7 @@ import {
 import { default as Plane } from './classes/Plane.js';
 import { default as Enemy } from './classes/Enemy.js';
 import { default as GroundEnemy } from './classes/GroundEnemy.js';
+import { default as Cura } from './classes/Cura.js';
 
 var scene = new THREE.Scene();    // Create main scene
 
@@ -84,34 +85,34 @@ function moverPlanos() {
 var keyboard = new KeyboardState();
 //********************************************//
 //Criando o avião
-var loader = new GLTFLoader();
-var obj;
-var mesh;
-const xx = loader.load('./assets/Airplane.glb', function (gltf) {
-    obj = gltf.scene;
-    console.log(gltf)
-    mesh = obj.children;
-    obj.name = 'airplane';
-    console.log(mesh);
-    obj.visible = true;
-    obj.traverse(function (child) {
-        if (child) {
-            child.castShadow = true;
-        }
-    });
-}, onProgress, onError);
+// var loader = new GLTFLoader();
+// var obj;
+// var mesh;
+// const xx = loader.load('./assets/Airplane.glb', function (gltf) {
+//     obj = gltf.scene;
+//     console.log(gltf)
+//     mesh = obj.children;
+//     obj.name = 'airplane';
+//     console.log(mesh);
+//     obj.visible = true;
+//     obj.traverse(function (child) {
+//         if (child) {
+//             child.castShadow = true;
+//         }
+//     });
+// }, onProgress, onError);
 
-function onError() { };
+// function onError() { };
 
-function onProgress(xhr, model) {
-    if (xhr.lengthComputable) {
-        var percentComplete = xhr.loaded / xhr.total * 100;
-    }
-}
-console.log(xx)
-const planeClass = new Plane(obj);
+// function onProgress(xhr, model) {
+//     if (xhr.lengthComputable) {
+//         var percentComplete = xhr.loaded / xhr.total * 100;
+//     }
+// }
+// console.log(xx)
+const planeClass = new Plane();
 var planeHolder = new THREE.Object3D();
-planeHolder.add(loader);
+planeHolder.add(planeClass);
 scene.add(planeHolder);
 //********************************************//
 var target = new THREE.Vector3();
@@ -120,16 +121,49 @@ var target = new THREE.Vector3();
 // Criando Adversários
 var enemyVector = [];
 var groundEnemyVector = [];
+var curaVector = [];
 
 // função para limitar quantos inimigos tem na tela
 function chamaAdversario() {
     var chance = Math.floor(Math.random() * 900) + 1;
-    if (chance <= 10) { // 0.01%
+    if (chance <= -10) { // 0.01%
         criarAdversario();
     }
-    if(chance <= 5){
+    if(chance <= -5){
         criarAdversarioChao();
     }
+}
+
+function chamaCura(){
+    var chance = Math.floor(Math.random() * 900) + 1;
+    if (chance <= 10) { // 0.01%
+        criarCura();
+    }
+}
+
+function criarCura(){
+    let cura = new Cura();
+    var newpos = Math.floor(Math.random() * 95) + 1;
+    newpos = 0;
+    const chance = Math.floor(Math.random() * 2) + 1;
+    newpos = chance === 1 ? newpos : -newpos;
+    cura.setPosition(newpos);
+    scene.add(cura.mesh);
+    curaVector.push(cura);
+}
+
+function verticalCura() {
+    curaVector.forEach(cura => {
+        cura.mesh.updateMatrixWorld(true);
+        if (cura.getPositionZ() >= 70) {
+            scene.remove(cura.mesh);
+            let id = curaVector.indexOf(cura);
+            curaVector.splice(id, 1);
+        }
+        if (cura.getPositionX() < 70) {
+            cura.mesh.translateY(0.5);
+        }
+    });
 }
 
 function criarAdversario() {
@@ -267,6 +301,17 @@ function colisionMissileEnemy() {
         });
     });
 }
+
+function colisionCuraPlane() {
+    curaVector.forEach(cura => {
+        let planeBox = box3.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
+        let curaBox = box.copy(cura.getBoundingBox()).applyMatrix4(cura.mesh.matrixWorld);
+        if(curaBox.containsBox(planeBox) || curaBox.intersectsBox(planeBox)) {
+            planeClass.recover(1);
+        }
+    });
+}
+
 /**
  * Para efetuar a animação dos inimigos
  */
@@ -389,6 +434,9 @@ function render() {
     chamaAdversario();
     movimentarAdversario();
 
+    chamaCura();
+    verticalCura();
+
     enemyVector.forEach(element => {
         element.createEnemyShoot(scene);
         element.moveBullets();
@@ -400,8 +448,8 @@ function render() {
     colisionBulletEnemy();
     colisionPlaneEnemy();
     colisionMissileEnemy();
+    colisionCuraPlane();
     animation();
-
     //if(acertouaviao) removePlane();
 
     if(planeClass.vida <= 0){

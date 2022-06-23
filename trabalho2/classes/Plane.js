@@ -15,7 +15,7 @@ export default class Plane {
    missiles;
    target;
    vida;
-   
+    
    
    constructor(aviao) {
       // this.loader.load('./assets/ToonTank.glb', function (gltf) {
@@ -35,7 +35,6 @@ export default class Plane {
       //     }
       // });
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
-      console.log(this.mesh);
       //this.mesh = aviao;
       this.mesh.position.set(0,16,0);
       this.mesh.castShadow = true;
@@ -129,6 +128,11 @@ export default class Plane {
 
    damage(dano){
       this.vida -= dano;
+   }
+   
+   recover(life){
+      if(this.vida < 10)
+         this.vida += life;
    }
 
    deletePlane(scene,planeHolder){
