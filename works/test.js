@@ -31,6 +31,8 @@ const material = new THREE.MeshBasicMaterial( {color: 0xffff00} );
 const cylinder = new THREE.Mesh( geometry, material );
 cylinder.position.set(0, 2, 0)
 scene.add( cylinder );
+cylinder.rotateX(degreesToRadians(90));
+cylinder.rotateZ(degreesToRadians(45));
 
 function moveGroundMissile() {
     cylinder.translateY(.05);
@@ -71,19 +73,19 @@ function render()
 
   // VerifyAngle();
 
-  if(cylinder.position.y <= 5 && canMove) {
-    moveGroundMissile();
-  } else {
-    if(cylinder.rotation.x != 1.5707963267948963) {
-      canMove = false;
-      cylinder.rotateX(degreesToRadians((90/9)));
-      cylinder.translateZ(0.01);
-    } else if(cylinder.rotation.x == 1.5707963267948963) {
-      // cylinder.rotateY(degreesToRadians(45));
-      // moveGroundMissile();
-      findEnemy();
-    }
-  }
+  // if(cylinder.position.y <= 5 && canMove) {
+  //   moveGroundMissile();
+  // } else {
+  //   if(cylinder.rotation.x != 1.5707963267948963) {
+  //     canMove = false;
+  //     cylinder.rotateX(degreesToRadians((90/6)));
+  //     cylinder.translateZ(0.01);
+  //   } else if(cylinder.rotation.x == 1.5707963267948963) {
+  //     // cylinder.rotateY(degreesToRadians(45));
+  //     // moveGroundMissile();
+  //     findEnemy();
+  //   }
+  // }
 
   // cylinder.rotateOnAxis((1,1,1), 0);
   renderer.render(scene, camera) // Render scene

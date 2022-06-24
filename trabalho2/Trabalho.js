@@ -207,19 +207,19 @@ function vertical(enemy) {
 //     // }
 // }
 
-// function verticalChao(enemy) {
-//     enemy.mesh.updateMatrixWorld(true);
-//     if (enemy.getPositionZ() >= 70) {
-//         scene.remove(enemy.mesh);
+function verticalChao(enemy) {
+    enemy.mesh.updateMatrixWorld(true);
+    if (enemy.getPositionZ() >= 70) {
+        scene.remove(enemy.mesh);
         
-//         let id = groundEnemyVector.indexOf(enemy);
-//         groundEnemyVector.splice(id,1);
-//     }
-//     if (enemy.getPositionZ() < 70) {
-//         var v = enemy.velocity;
-//         enemy.mesh.translateZ(0.2 * v);
-//     }
-// }
+        let id = groundEnemyVector.indexOf(enemy);
+        groundEnemyVector.splice(id,1);
+    }
+    if (enemy.getPositionZ() < 70) {
+        var v = enemy.velocity;
+        enemy.mesh.translateZ(0.2 * v);
+    }
+}
 
 // function diagonal(enemy) {
 //     enemy.mesh.updateMatrixWorld(true);
