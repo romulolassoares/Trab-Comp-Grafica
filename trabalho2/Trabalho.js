@@ -14,13 +14,13 @@ import { default as GroundEnemy } from './classes/GroundEnemy.js';
 import { default as Cura } from './classes/Cura.js';
 
 var scene = new THREE.Scene();    // Create main scene
-var scene2 = new THREE.Scene();    // Create second scene
 
 var renderer = new THREE.WebGLRenderer({alpha: true});
 document.getElementById("webgl-output").appendChild(renderer.domElement);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.VSMShadowMap; // default
+renderer.autoClear = false;
 
 var clock = new THREE.Clock();
 clock.start();
@@ -97,32 +97,23 @@ function moverPlanos() {
 var keyboard = new KeyboardState();
 //********************************************//
 //Criando o avião
-// var loader = new GLTFLoader();
-// var obj;
-// var mesh;
-// const xx = loader.load('./assets/Airplane.glb', function (gltf) {
-//     obj = gltf.scene;
-//     console.log(gltf)
-//     mesh = obj.children;
-//     obj.name = 'airplane';
-//     console.log(mesh);
-//     obj.visible = true;
-//     obj.traverse(function (child) {
-//         if (child) {
-//             child.castShadow = true;
-//         }
-//     });
-// }, onProgress, onError);
-
-// function onError() { };
-
-// function onProgress(xhr, model) {
-//     if (xhr.lengthComputable) {
-//         var percentComplete = xhr.loaded / xhr.total * 100;
-//     }
-// }
-// console.log(xx)
-const planeClass = new Plane();
+var loader = new GLTFLoader();
+var object;
+var geometry = new THREE.BufferGeometry();
+var material;// = new MeshPhongMaterial();
+var mesh;
+loader.load('./assets/Airplane.glb', function (gltf) {
+    gltf.scene.traverse(function (child) {
+            geometry = child.geometry;
+            material = child.material;
+      });
+});
+// (object.children[0] as THREE.Mesh).material = material
+        // object.traverse(function (child) {
+        //     if ((child as THREE.Mesh).isMesh) {
+        //         (child as THREE.Mesh).material = material
+        //     }
+const planeClass = new Plane(geometry,material);
 var planeHolder = new THREE.Object3D();
 planeHolder.add(planeClass.mesh);
 scene.add(planeHolder);
@@ -409,11 +400,7 @@ function keyboardUpdate() {
             planeHolder.translateX(-moveDistance);
     }
     if (keyboard.down("G")) {
-        if (planeClass.getIsMortal()){
-            planeClass.isMortal = false;
-        }
-        else
-            planeClass.isMortal = true;
+        planeClass.isMortal = !planeClass.isMortal;
     }
     if (keyboard.pressed("ctrl") && !cooldownBullet){
         planeClass.createShoot(scene);
@@ -467,7 +454,7 @@ function controlledRender()
   renderer.setViewport(100, 100, 100, 100);  // Set virtual camera viewport  
   renderer.setScissor(offset, height-vcHeidth+50, vcHeidth-50, vcHeidth-50); // Set scissor with the same size as the viewport
   renderer.setScissorTest(true); // Enable scissor to paint only the scissor are (i.e., the small viewport)
-  renderer.setClearColor( "rgb(255,255,255)");  // Use a darker clear color in the small viewport 
+  renderer.setClearColor( 0xffffff, 0);
   renderer.clear(); // Clean the small viewport
   renderer.render(scene, virtualCamera);  // Render scene of the virtual camera
 }
