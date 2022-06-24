@@ -32,7 +32,4 @@ export default class Bullet {
       return this.mesh.position.y;
    }
 
-   randomMovimentation() {
-      this.movimentation = Math.floor(Math.random()*2);
-   }
 }

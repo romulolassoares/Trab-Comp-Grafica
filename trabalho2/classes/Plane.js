@@ -7,7 +7,7 @@ export default class Plane {
    // Private
    #geometry = new THREE.ConeGeometry(5, 15, 64);
    #material = new THREE.MeshLambertMaterial({color:'rgb(180,180,255)'});
-   loader = new GLTFLoader();
+   //loader = new GLTFLoader();
    // Public
    mesh;
    boundingBox = new THREE.Box3();
@@ -15,7 +15,8 @@ export default class Plane {
    missiles;
    target;
    vida;
-   
+   isMortal;
+    
    
    constructor() {
       // this.loader.load('./assets/ToonTank.glb', function (gltf) {
@@ -35,7 +36,6 @@ export default class Plane {
       //     }
       // });
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
-      console.log(this.mesh);
       //this.mesh = aviao;
       this.mesh.position.set(0,16,0);
       this.mesh.castShadow = true;
@@ -48,6 +48,7 @@ export default class Plane {
       this.missiles = [];
       this.target = new THREE.Vector3();
       this.vida = 10;
+      this.isMortal = true;
    }
 
    getBoundingBox() {
@@ -130,6 +131,11 @@ export default class Plane {
    damage(dano){
       this.vida -= dano;
    }
+   
+   recover(life){
+      if(this.vida < 10)
+         this.vida += life;
+   }
 
    deletePlane(scene,planeHolder){
       scene.remove(this.mesh);
@@ -139,6 +145,10 @@ export default class Plane {
 
    getVida(){
       return this.vida;
+   }
+
+   getIsMortal(){
+      return this.isMortal;
    }
    
 }
