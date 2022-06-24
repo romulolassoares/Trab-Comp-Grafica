@@ -17,6 +17,7 @@ export default class Cura {
 
     boundingBox = new THREE.Box3();
     mesh;
+    isCaught;
 
     constructor(aviao) {
         this.cubeMesh.position.set(0.8, 0, 2);
@@ -48,6 +49,7 @@ export default class Cura {
          .applyMatrix4(this.mesh.matrixWorld);
         this.mesh.rotateX(degreesToRadians(90));
         this.mesh.scale.set(2,2,2);
+        this.isCaught = false;
     }
 
     getBoundingBox() {
@@ -67,6 +69,10 @@ export default class Cura {
     }
     getPositionY() {
         return this.mesh.position.y;
+    }
+
+    setIsCaught(){
+        this.isCaught = true;
     }
 
     delete(scene, id, curaVector){

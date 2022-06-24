@@ -58,12 +58,14 @@ camera.position.set(0, 100, 70);
 camera.lookAt(0, 15, 0);
 scene.add(camera);
 
-var lookAtVec   = new THREE.Vector3( 0.0, 15.0, 0.0 );
-var camPosition = new THREE.Vector3( 0, 100, 70 );
+var lookAtVec   = new THREE.Vector3( 0.0, 0, -15.0 );
+var lookUp   = new THREE.Vector3( 0.0, 1, 0 );
+var camPosition = new THREE.Vector3( 0, -15, 0 );
 var vcWidth = 400; 
 var vcHeidth = 300; 
 var virtualCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300);
   virtualCamera.position.copy(camPosition);
+  virtualCamera.up.copy(lookUp);
   virtualCamera.lookAt(lookAtVec);
 //********************************************//
 //Criando os planos
@@ -129,6 +131,7 @@ var target = new THREE.Vector3();
 
 //********************************************//
 // Criando Adversários
+var createEnemy = true;
 var enemyVector = [];
 var groundEnemyVector = [];
 var curaVector = [];
@@ -149,7 +152,7 @@ function chamaAdversario() {
 function criarCura(){
     let cura = new Cura();
     var newpos = Math.floor(Math.random() * 95) + 1;
-    //newpos = 0;
+    newpos = 0;
     const chance = Math.floor(Math.random() * 2) + 1;
     newpos = chance === 1 ? newpos : -newpos;
     cura.setPosition(newpos);
@@ -272,7 +275,8 @@ function colisionPlaneEnemy(){
             enemy.deleteAllBullets(scene);
             enemy.setIsDead(scene);
             console.log(planeClass.vida);
-            planeClass.damage(0.2);
+            if(planeClass.getIsMortal())
+                planeClass.damage(0.2);
         }
     });
 }
@@ -314,7 +318,7 @@ function colisionCuraPlane() {
         if(curaBox.containsBox(planeBox) || curaBox.intersectsBox(planeBox)) {
             planeClass.recover(1);
             let id = curaVector.indexOf(cura);
-            cura.delete(scene,id, curaVector);
+            cura.setIsCaught();
         }
     });
 }
@@ -368,6 +372,14 @@ function animation() {
             }
         }
     })
+    curaVector.forEach(cura => {
+        if(cura.isCaught)
+        if(cura.mesh.scale.x>=0){
+            cura.mesh.scale.x -=.1;
+            cura.mesh.scale.y -=.1;
+            cura.mesh.scale.z -=.1;
+        }
+    });
 }
 
 //********************************************//
@@ -399,11 +411,11 @@ function keyboardUpdate() {
             planeHolder.translateX(-moveDistance);
     }
     if (keyboard.down("G")) {
-        if (planeClass.getVida() > 10){
-            planeClass.vida = 10
+        if (planeClass.getIsMortal()){
+            planeClass.isMortal = false;
         }
         else
-            planeClass.vida = 100000000000
+            planeClass.isMortal = true;
     }
     if (keyboard.pressed("ctrl") && !cooldownBullet){
         planeClass.createShoot(scene);
@@ -415,6 +427,22 @@ function keyboardUpdate() {
         cooldownMissile = true;
         setTimeout( () => cooldownMissile = false, 1000);
     }
+    if (keyboard.pressed("enter")){
+        createEnemy = false;
+        enemyVector.forEach(enemy => {
+            enemy.deleteAllBullets(scene);
+            enemy.setIsDead(scene);
+        });
+        groundEnemyVector.forEach(enemy => {
+            enemy.deleteAllBullets(scene);
+            enemy.setIsDead(scene);
+        });
+        curaVector.forEach(cura => {
+            cura.setIsCaught();
+        });
+        planeHolder.position.set(0,16,0);
+        createEnemy = true;
+    }
 }
 //********************************************//
 
@@ -424,7 +452,6 @@ window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)},
 render();
 
 document.getElementById("webgl-output").appendChild(stats.domElement);//Pra mostrar o FPS
-
 function controlledRender()
 {
   var width = window.innerWidth;
@@ -438,11 +465,11 @@ function controlledRender()
   renderer.render(scene, camera);   
 
   // Set virtual camera viewport 
-  var offset = 30; 
+  var offset = 100; 
   renderer.setViewport(offset, height-vcHeidth-offset, vcWidth, vcHeidth);  // Set virtual camera viewport  
   renderer.setScissor(offset, height-vcHeidth-offset, vcWidth, vcHeidth); // Set scissor with the same size as the viewport
   renderer.setScissorTest(true); // Enable scissor to paint only the scissor are (i.e., the small viewport)
-  renderer.setClearColor("rgb(60, 50, 150)");  // Use a darker clear color in the small viewport 
+  renderer.setClearColor(0x000000);  // Use a darker clear color in the small viewport 
   renderer.clear(); // Clean the small viewport
   renderer.render(scene, virtualCamera);  // Render scene of the virtual camera
 }
@@ -459,10 +486,12 @@ function render() {
     planeClass.deleteBullets(scene);
     planeClass.deleteMissiles(scene);
 
-    chamaAdversario();
-    movimentarAdversario();
+    if(createEnemy){
+        chamaAdversario();
+        movimentarAdversario();
+        verticalCura();
+    }
 
-    verticalCura();
 
     enemyVector.forEach(element => {
         element.createEnemyShoot(scene);

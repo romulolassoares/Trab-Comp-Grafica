@@ -15,6 +15,7 @@ export default class Plane {
    missiles;
    target;
    vida;
+   isMortal;
     
    
    constructor(aviao) {
@@ -47,6 +48,7 @@ export default class Plane {
       this.missiles = [];
       this.target = new THREE.Vector3();
       this.vida = 10;
+      this.isMortal = true;
    }
 
    getBoundingBox() {
@@ -142,6 +144,10 @@ export default class Plane {
    }
    getVida(){
       return this.vida;
+   }
+
+   getIsMortal(){
+      return this.isMortal;
    }
    
 }

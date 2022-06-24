@@ -87,5 +87,4 @@ export default class Plane {
          array.splice(id, 1);
       })
    }
-   
 }
