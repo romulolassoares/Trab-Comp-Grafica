@@ -32,7 +32,7 @@ export default class Plane {
    }
 
    setPosition(newpos) {
-      this.mesh.position.set(newpos,20,-200);
+      this.mesh.position.set(newpos,20,-50);
    }
 
    setVelocity(vel) {

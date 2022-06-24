@@ -6,8 +6,8 @@ export default class Cura {
     auxMat = new THREE.Matrix4();
 
     cylinderMesh = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 0.5, 20));
-    cubeMesh = new THREE.Mesh(new THREE.BoxGeometry(2.4, 30, 0.5));
-    cubeMesh2 = new THREE.Mesh(new THREE.BoxGeometry(2.4, 30, 0.5));
+    cubeMesh = new THREE.Mesh(new THREE.BoxGeometry(2.4, 5, 0.5));
+    cubeMesh2 = new THREE.Mesh(new THREE.BoxGeometry(2.4, 5, 0.5));
     
     csgObject;
     cylinderCSG;

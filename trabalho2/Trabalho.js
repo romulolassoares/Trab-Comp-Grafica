@@ -113,7 +113,7 @@ loader.load('./assets/Airplane.glb', function (gltf) {
         //     if ((child as THREE.Mesh).isMesh) {
         //         (child as THREE.Mesh).material = material
         //     }
-const planeClass = new Plane(geometry,material);
+const planeClass = new Plane();
 var planeHolder = new THREE.Object3D();
 planeHolder.add(planeClass.mesh);
 scene.add(planeHolder);
@@ -266,6 +266,7 @@ function colisionPlaneEnemy(){
             console.log(planeClass.vida);
             if(planeClass.getIsMortal())
                 planeClass.damage(0.2);
+            console.log("Morreu aqui");
         }
     });
 }
@@ -455,7 +456,6 @@ function controlledRender()
   renderer.setScissor(offset, height-vcHeidth+50, vcHeidth-50, vcHeidth-50); // Set scissor with the same size as the viewport
   renderer.setScissorTest(true); // Enable scissor to paint only the scissor are (i.e., the small viewport)
   renderer.setClearColor( 0xffffff, 0);
-  renderer.clear(); // Clean the small viewport
   renderer.render(scene, virtualCamera);  // Render scene of the virtual camera
 }
 

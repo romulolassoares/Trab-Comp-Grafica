@@ -19,8 +19,8 @@ export default class Plane {
    isMortal;
     
    
-   constructor(geometry,material) {
-      this.mesh = new THREE.Mesh(geometry, material);
+   constructor() {
+      this.mesh = new THREE.Mesh(this.#geometry, this.#material);
       // this.mesh = aviao;
       // this.mesh.scale.set(5,5,5);
       this.mesh.position.set(0,16,0);
