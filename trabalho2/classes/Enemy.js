@@ -103,9 +103,14 @@ export default class Plane {
       this.bulletCooldown = true;
       array.forEach(element => {
          scene.remove(element.mesh);
+         // let id = array.indexOf(element);
+         // array.splice(id, 1);
+      });
+      array.forEach(element => {
+         // scene.remove(element.mesh);
          let id = array.indexOf(element);
          array.splice(id, 1);
-      })
+      });
    }
    
    move(enemyVector, id, scene) {
@@ -183,8 +188,8 @@ export default class Plane {
       this.mesh.updateMatrixWorld(true);
       if(this.getPositionZ() <= -200 && this.getPositionX() > 39) {
          scene.remove(this.mesh);
-        this.deleteAllBullets(scene);
-        enemyVector.splice(id, 1);
+         this.deleteAllBullets(scene);
+         enemyVector.splice(id, 1);
       } else {
          if(this.mesh.position.z <= -88 || this.mesh.position.x > 39){
             if(this.mesh.position.x > 39) {

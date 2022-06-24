@@ -124,10 +124,10 @@ var groundEnemyVector = [];
 // função para limitar quantos inimigos tem na tela
 function chamaAdversario() {
     var chance = Math.floor(Math.random() * 900) + 1;
-    if (chance <= 5) { // 0.01%
+    if (chance <= 0) { // 0.01%
         criarAdversario();
     }
-    if(chance <= 1){
+    if(chance <= 100){
         criarAdversarioChao();
     }
 }
@@ -302,7 +302,7 @@ function colisionMissileEnemy() {
             let missileBox = box2.copy(missile.getBoundingBox()).applyMatrix4( missile.mesh.matrixWorld )
             if(enemyBox.containsBox(missileBox) || enemyBox.intersectsBox(missileBox)) {
                 planeClass.deleteOneMissile(missile, scene);
-                enemy.deleteAllBullets(scene);
+                enemy.deleteAllMissiles(scene);
                 enemy.setIsDead(scene);
             }
         });
@@ -399,7 +399,7 @@ function keyboardUpdate() {
     if (keyboard.pressed("ctrl") && !cooldownBullet){
         planeClass.createShoot(scene);
         cooldownBullet = true;
-        setTimeout( () => cooldownBullet = false, 500);
+        setTimeout( () => cooldownBullet = false, 800);
     }
     if (keyboard.pressed("space") && !cooldownMissile){
         planeClass.createMissiles(scene);
@@ -437,6 +437,14 @@ function render() {
         element.moveBullets();
         if(element.getPositionZ() > 45) {
             element.deleteAllBullets(scene);
+        }
+    });
+
+    groundEnemyVector.forEach(element => {
+        element.createMissiles(scene);
+        element.moveMissiles(planeClass.target);
+        if(element.getPositionZ() > 45) {
+            element.deleteAllMissiles(scene);
         }
     });
 

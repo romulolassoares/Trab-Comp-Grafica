@@ -1,5 +1,11 @@
 import * as THREE from 'three';
 import { default as Bullet } from './Bullet.js';
+import { default as GroundMissile } from './GroundMissile.js';
+import {
+   onWindowResize,
+   degreesToRadians,
+   createGroundPlane
+} from "../../libs/util/util.js";
 
 export default class Plane {
    // Private
@@ -11,8 +17,8 @@ export default class Plane {
    velocity;
    isDead;
    isShooting;
-   bullets;
-   bulletCooldown;
+   missiles;
+   missileCooldown;
    canShoot;
    target;
 
@@ -23,8 +29,8 @@ export default class Plane {
       this.boundingBox.copy(this.mesh.geometry.boundingBox).applyMatrix4(this.mesh.matrixWorld);
       this.isDead = false;
       this.isShooting = true;
-      this.bullets = [];
-      this.bulletCooldown = false;
+      this.missiles = [];
+      this.missileCooldown = false;
       this.canShoot = true;
       this.target = new THREE.Vector3();
       this.mesh.castShadow = true;
@@ -52,37 +58,66 @@ export default class Plane {
    }
 
    setIsDead(scene) {
-      this.deleteAllBullets(scene);
+      this.deleteAllMissiles(scene);
       this.isDead = true;
       this.velocity = 0;
    }
 
-   createEnemyShoot(scene) {
-      if(!this.bulletCooldown && this.canShoot) {
-         let bullet = new Bullet();
+   createMissiles(scene) {
+      if(!this.missileCooldown) {
+         let missile = new GroundMissile();
          this.mesh.getWorldPosition(this.target);
-         bullet.setPosition(this.target);
-         this.bullets.push(bullet);
-         scene.add(bullet.mesh);
-         this.bulletCooldown = true;
-         setTimeout( () => this.bulletCooldown = false, 2500);
+         missile.setPosition(this.target);
+         this.missiles.push(missile);
+         scene.add(missile.mesh);
+         this.missileCooldown = true;
+         setTimeout( () => this.missileCooldown = false, 800);
       }
    }
 
-   moveBullets() {
-      let array = this.bullets;
+   moveMissiles(planeTarget) {
+      let array = this.missiles;
       array.forEach(element => {
          let v = this.velocity;
-         element.mesh.translateZ(v*0.3);
+         // element.mesh.translateZ(v*0.3);
+         if(element.getPositionY() <= 16) {
+            element.mesh.translateY(.5);
+         } else {
+            // element.mesh.rotateX(degreesToRadians(90));
+            // element.mesh.translateY(v*.5);
+            if(element.mesh.rotation.x != 1.5707963267948963) {
+               element.mesh.rotateX(degreesToRadians(90));
+            } else if (element.mesh.rotation.x == 1.5707963267948963) {
+               // element.mesh.lookAt(planeTarget);
+               element.mesh.translateY(v*.5);
+            }
+         }
       });
    }
 
-   deleteAllBullets(scene) {
-      this.canShoot = false;
-      let array = this.bullets;
-      this.bulletCooldown = true;
+    // if(cylinder.position.y <= 5 && canMove) {
+  //   moveGroundMissile();
+  // } else {
+  //   if(cylinder.rotation.x != 1.5707963267948963) {
+  //     canMove = false;
+  //     cylinder.rotateX(degreesToRadians((90/6)));
+  //     cylinder.translateZ(0.01);
+  //   } else if(cylinder.rotation.x == 1.5707963267948963) {
+  //     // cylinder.rotateY(degreesToRadians(45));
+  //     // moveGroundMissile();
+  //     findEnemy();
+  //   }
+  // }
+
+   deleteAllMissiles(scene) {
+      let array = this.missiles;
       array.forEach(element => {
          scene.remove(element.mesh);
+         // let id = array.indexOf(element);
+         // array.splice(id, 1);
+      })
+      array.forEach(element => {
+         // scene.remove(element.mesh);
          let id = array.indexOf(element);
          array.splice(id, 1);
       })
