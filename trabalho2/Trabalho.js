@@ -97,32 +97,46 @@ function moverPlanos() {
 var keyboard = new KeyboardState();
 //********************************************//
 //Criando o avião
-// var loader = new GLTFLoader();
-// var obj;
-// var mesh;
-// const xx = loader.load('./assets/Airplane.glb', function (gltf) {
-//     obj = gltf.scene;
-//     console.log(gltf)
-//     mesh = obj.children;
-//     obj.name = 'airplane';
-//     console.log(mesh);
-//     obj.visible = true;
-//     obj.traverse(function (child) {
-//         if (child) {
-//             child.castShadow = true;
-//         }
-//     });
-// }, onProgress, onError);
+var loader = new GLTFLoader();
+var obj;
+var mesh;
+var material;
+const afterload = (object) => {
+    // this.obj = object;
+    // this.obj.castShadow = true;
+    object.rotateY(degreesToRadians(-90))
+    planeClass.setObj(object);
+    // planeHolder.add(planeClass.obj);
+    scene.add(object);
+};
 
-// function onError() { };
+loader.load('./assets/Airplane.glb', function (gltf) {
+    obj = gltf.scene;
+    // console.log(gltf)
+    obj.position.set(0,16,0);
+    mesh = obj.children;
+    obj.name = 'airplane';
+    // console.log(mesh);
+    obj.visible = true;
+    obj.traverse(function (child) {
+        if (child) {
+            child.castShadow = true;
+            material = child.material;
+        }
+    });
+    // scene.add(obj);
+    afterload(gltf.scene);
+}, onProgress, onError);
 
-// function onProgress(xhr, model) {
-//     if (xhr.lengthComputable) {
-//         var percentComplete = xhr.loaded / xhr.total * 100;
-//     }
-// }
+function onError() { };
+
+function onProgress(xhr, model) {
+    if (xhr.lengthComputable) {
+        var percentComplete = xhr.loaded / xhr.total * 100;
+    }
+}
 // console.log(xx)
-const planeClass = new Plane();
+const planeClass = new Plane(material);
 var planeHolder = new THREE.Object3D();
 planeHolder.add(planeClass.mesh);
 scene.add(planeHolder);
@@ -142,7 +156,7 @@ function chamaAdversario() {
     if (chance <= 0) { // 0.01%
         criarAdversario();
     }
-    if(chance <= 100){
+    if(chance <= 0){
         criarAdversarioChao();
     }
     if(chance <= 1)
@@ -438,20 +452,28 @@ function keyboardUpdate() {
     // Keyboard.pressed - execute while is pressed
     planeClass.mesh.getWorldPosition(target);
     if (keyboard.pressed("down")) {
-        if (target.z <= 45)
+        if (target.z <= 45) {
             planeHolder.translateZ(moveDistance);
+            planeClass.obj.translateX(moveDistance);
+        }
     }
     if (keyboard.pressed("up")) {
-        if (target.z >= -150)
+        if (target.z >= -150) {
             planeHolder.translateZ(-moveDistance);
+            planeClass.obj.translateX(-moveDistance)
+        }
     }
     if (keyboard.pressed("right")) {
-        if (target.x <= 95)
+        if (target.x <= 95) {
             planeHolder.translateX(moveDistance);
+            planeClass.obj.translateZ(-moveDistance)
+        }
     }
     if (keyboard.pressed("left")) {
-        if (target.x >= -95)
+        if (target.x >= -95) {
             planeHolder.translateX(-moveDistance);
+            planeClass.obj.translateZ(moveDistance)
+        }
     }
     if (keyboard.down("G")) {
         if (planeClass.getIsMortal()){
@@ -507,14 +529,14 @@ function controlledRender()
   renderer.clear();   // Clean the window
   renderer.render(scene, camera);   
 
-  // Set virtual camera viewport 
-  var offset = 100; 
-  renderer.setViewport(offset, height-vcHeidth-offset, vcWidth, vcHeidth);  // Set virtual camera viewport  
-  renderer.setScissor(offset, height-vcHeidth-offset, vcWidth, vcHeidth); // Set scissor with the same size as the viewport
-  renderer.setScissorTest(true); // Enable scissor to paint only the scissor are (i.e., the small viewport)
-  renderer.setClearColor(0x000000);  // Use a darker clear color in the small viewport 
-  renderer.clear(); // Clean the small viewport
-  renderer.render(scene, virtualCamera);  // Render scene of the virtual camera
+//   // Set virtual camera viewport 
+//   var offset = 100; 
+//   renderer.setViewport(offset, height-vcHeidth-offset, vcWidth, vcHeidth);  // Set virtual camera viewport  
+//   renderer.setScissor(offset, height-vcHeidth-offset, vcWidth, vcHeidth); // Set scissor with the same size as the viewport
+//   renderer.setScissorTest(true); // Enable scissor to paint only the scissor are (i.e., the small viewport)
+//   renderer.setClearColor(0x000000);  // Use a darker clear color in the small viewport 
+//   renderer.clear(); // Clean the small viewport
+//   renderer.render(scene, virtualCamera);  // Render scene of the virtual camera
 }
 
 function render() {

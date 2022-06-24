@@ -6,10 +6,12 @@ import { GLTFLoader } from '../../build/jsm/loaders/GLTFLoader.js';
 export default class Plane {
    // Private
    #geometry = new THREE.ConeGeometry(5, 15, 64);
+   // #material;
    #material = new THREE.MeshLambertMaterial({color:'rgb(180,180,255)'});
    //loader = new GLTFLoader();
    // Public
    mesh;
+   obj;
    boundingBox = new THREE.Box3();
    bullets;
    missiles;
@@ -18,7 +20,7 @@ export default class Plane {
    isMortal;
     
    
-   constructor() {
+   constructor(material) {
       // this.loader.load('./assets/ToonTank.glb', function (gltf) {
       //  this.mesh = gltf.asset;    
       //  this.mesh.visible = true;
@@ -36,9 +38,9 @@ export default class Plane {
       //     }
       // });
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
-      //this.mesh = aviao;
+      this.mesh.opacity = 0;
       this.mesh.position.set(0,16,0);
-      this.mesh.castShadow = true;
+      // this.mesh.castShadow = true;
       this.mesh.rotateX(-1.6);
       this.mesh.geometry.computeBoundingBox();
       this.boundingBox
@@ -49,6 +51,10 @@ export default class Plane {
       this.target = new THREE.Vector3();
       this.vida = 10;
       this.isMortal = true;
+   }
+
+   setObj(obj) {
+      this.obj = obj;
    }
 
    getBoundingBox() {
