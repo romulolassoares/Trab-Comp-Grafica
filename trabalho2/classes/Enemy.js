@@ -1,4 +1,9 @@
 import * as THREE from 'three';
+import {
+   onWindowResize,
+   degreesToRadians,
+   createGroundPlane
+} from "../../libs/util/util.js";
 import { default as Bullet } from './Bullet.js';
 
 export default class Plane {
@@ -34,15 +39,20 @@ export default class Plane {
       this.target = new THREE.Vector3();
       this.mesh.castShadow = true;
       this.mesh.receiveShadow = true;
-      this.moveType = Math.floor(Math.random() * 3);
+      this.moveType = Math.floor(Math.random() * 4);
+      // this.moveType = 0;
       this.timeAlive = 3;
       this.dir = 1;
    }
 
    setPosition(newpos) {
-      this.#startPosition = new THREE.Vector3(newpos,16,-20);
-      console.log(this.#startPosition)
-      this.mesh.position.set(newpos,16,-20);
+      if(this.moveType == 3) {
+         this.#startPosition = new THREE.Vector3(-41.18956708386401,16,-200);
+         this.mesh.position.set(-41.18956708386401,16,-200);
+      } else {
+         this.#startPosition = new THREE.Vector3(newpos,16,-200);
+         this.mesh.position.set(newpos,16,-200);
+      }
    }
 
    setVelocity(vel) {
@@ -98,38 +108,99 @@ export default class Plane {
       })
    }
    
-   move() {
-      switch (this.moveType) {
-         // case 0: vertical(enemy);
-         // case 1: diagonal(enemy);
-         default: ;
+   move(enemyVector, id, scene) {
+      if(this.moveType === 0) {
+         this.verticalMove(enemyVector, id, scene);
+      } else if(this.moveType === 1) {
+         this.diagonalMove(enemyVector, id, scene);
+      } else if(this.moveType === 2) {
+         this.verticalAndStopMove(enemyVector, id, scene);
+      } else if(this.moveType === 3) {
+         this.rotateMove(enemyVector, id, scene);
       }
    }
 
-   verticalMove() {
-      this.mesh.translateZ(0.2 * this.velocity);
-   }
-
-   rotateMove(path) {
-      // points.forEach(point => {
-      //    this.mesh.position.set(point.x, point.y, point.z)
-      // })
-      // const path = new THREE.Path();
-      // path.quadraticCurveTo(this.#startPosition.x, this.#startPosition.z, -10, -100)
-      // // const points = path.getPoints();
-
-      // // const geometry = new THREE.BufferGeometry().setFromPoints( points );
-      // // const material = new THREE.LineBasicMaterial( { color: 0xffffff } );
-
-      // // const line = new THREE.Line( geometry, material );
-      // // scene.add( line );
-      this.t += 0.01;
-      var pos = path.getPoint(this.t);
-      if(pos != null) {
-         // this.mesh.position.set(pos.x, this.mesh.position.y, this.mesh.position.z+pos.x)  
+   verticalMove(enemyVector, id, scene) {
+      this.mesh.updateMatrixWorld(true);
+      if (this.getPositionZ() >= 70) {
+         scene.remove(this.mesh);
+         this.deleteAllBullets(scene);
+         enemyVector.splice(id, 1);
+      } else {
+         this.mesh.translateZ(0.2 * this.velocity);
       }
-      // this.mesh.translateZ(0.2 * this.velocity);
    }
 
-   diagonalMove() {}
+   diagonalMove(enemyVector, id, scene) {
+      this.mesh.updateMatrixWorld(true);
+      if (this.getPositionZ() >= 70) {
+         scene.remove(this.mesh);
+         this.deleteAllBullets(scene);
+         enemyVector.splice(id, 1);
+      } else {
+         if(this.getPositionX() >= 95 || this.getPositionX() < -95) {
+            this.dir = -this.dir
+         }
+         if (this.getPositionZ() < 70) {
+            var v = this.velocity;
+            var x = this.dir;
+            this.mesh.translateZ(0.2 * v);
+            this.mesh.translateX(0.2 * v * x);
+         }
+      }
+   }
+
+   verticalAndStopMove(enemyVector, id, scene) {
+      this.mesh.updateMatrixWorld(true);
+      if (this.getPositionZ() >= 70 || this.getPositionX() > 120 || this.getPositionX() < -120) {
+         scene.remove(this.mesh);
+         this.deleteAllBullets(scene);
+         enemyVector.splice(id, 1);
+      } else {
+         if (this.getPositionZ() < -30) {
+            this.verticalMove();
+         }
+         if(this.getPositionX() >= 95 || this.getPositionX() < -95) {
+            this.dir = -this.dir;
+            this.timeAlive--;
+         }
+         if(this.getPositionZ() >= -40) {
+            var v = this.velocity;
+            var x = this.dir;
+            if(this.timeAlive > 0){
+               this.mesh.translateX(0.2 * v * x);
+            } else {
+               this.mesh.translateX(0.2 * v);
+            }
+         }
+      }
+   }
+   
+   rotateMove(enemyVector, id, scene) {
+      const path = new THREE.Path();
+      path.absarc(0, 90, degreesToRadians(2360), degreesToRadians(0), degreesToRadians(180), true);
+
+      this.mesh.updateMatrixWorld(true);
+      if(this.getPositionZ() <= -200 && this.getPositionX() > 39) {
+         scene.remove(this.mesh);
+        this.deleteAllBullets(scene);
+        enemyVector.splice(id, 1);
+      } else {
+         if(this.mesh.position.z <= -88 || this.mesh.position.x > 39){
+            if(this.mesh.position.x > 39) {
+               this.dir = -1;
+            }
+            this.mesh.translateZ(0.2 * this.velocity * this.dir);
+         } else {
+            this.t += 0.005;
+         
+            var pos = path.getPoint(this.t);
+            if(pos != null) {
+               this.mesh.position.set(-pos.x, this.mesh.position.y, -pos.y);
+            }
+         }
+      }
+   }
+
+
 }

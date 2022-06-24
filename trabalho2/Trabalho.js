@@ -124,7 +124,7 @@ var groundEnemyVector = [];
 // função para limitar quantos inimigos tem na tela
 function chamaAdversario() {
     var chance = Math.floor(Math.random() * 900) + 1;
-    if (chance <= 900) { // 0.01%
+    if (chance <= 5) { // 0.01%
         criarAdversario();
     }
     if(chance <= 1){
@@ -167,10 +167,11 @@ function movimentarAdversario() {
         //     diagonal(enemy);
         // } else if(enemy.moveType === 2) {
         //     verticalAndStop(enemy);
+        // } else if(enemy.moveType === 3) {
+        //     moveRotate(enemy);
         // }
-        // diagonal(enemy);
-        // verticalAndStop(enemy);
-        moveRotate(enemy);
+        let id = enemyVector.indexOf(enemy);
+        enemy.move(enemyVector, id, scene);
     });
     groundEnemyVector.forEach(enemy => {
         verticalChao(enemy);
@@ -179,94 +180,79 @@ function movimentarAdversario() {
 
 // Função para mover os inimigos na vertical
 function vertical(enemy) {
-    enemy.mesh.updateMatrixWorld(true);
-    if (enemy.getPositionZ() >= 70) {
-        scene.remove(enemy.mesh);
-        let id = enemyVector.indexOf(enemy);
-        // enemyVector.splice(id, 1);
-    }
-    if (enemy.getPositionZ() < 70) {
-        enemy.verticalMove();
-    }
+    // enemy.mesh.updateMatrixWorld(true);
+    // if (enemy.getPositionZ() >= 70) {
+    //     scene.remove(enemy.mesh);
+    //     enemy.deleteAllBullets(scene);
+    //     let id = enemyVector.indexOf(enemy);
+    //     enemyVector.splice(id, 1);
+    // }
+    // if (enemy.getPositionZ() < 70) {
+    //     enemy.verticalMove();
+    // }
+    let id = enemyVector.indexOf(enemy);
+    enemy.verticalMove(enemyVector, id, scene);
+    console.log(enemyVector.length);
 }
 
-function verticalAndStop(enemy) {
-    enemy.mesh.updateMatrixWorld(true);
-    if (enemy.getPositionZ() >= 70 || enemy.getPositionX() > 120 || enemy.getPositionX() < -120) {
-        scene.remove(enemy.mesh);
-        let id = enemyVector.indexOf(enemy);
-        enemyVector.splice(id, 1);
-    }
-    if (enemy.getPositionZ() < -30) {
-        enemy.verticalMove();
-    }
-    if(enemy.getPositionX() >= 95 || enemy.getPositionX() < -95) {
-        enemy.dir = -enemy.dir;
-        enemy.timeAlive--;
-    }
-    if(enemy.getPositionZ() >= -40) {
-        var v = enemy.velocity;
-        var x = enemy.dir;
-        if(enemy.timeAlive > 0){
-            enemy.mesh.translateX(0.2 * v * x);
-        } else {
-            enemy.mesh.translateX(0.2 * v);
-        }
-    }
-}
+// function verticalAndStop(enemy) {
+//     // enemy.mesh.updateMatrixWorld(true);
+//     // if (enemy.getPositionZ() >= 70 || enemy.getPositionX() > 120 || enemy.getPositionX() < -120) {
+//     //     scene.remove(enemy.mesh);
+//     //     enemy.deleteAllBullets(scene);
+//     //     let id = enemyVector.indexOf(enemy);
+//     //     enemyVector.splice(id, 1);
+//     // } else {
+//     //     enemy.verticalAndStopMove();
+//     // }
+// }
 
-function verticalChao(enemy) {
-    enemy.mesh.updateMatrixWorld(true);
-    if (enemy.getPositionZ() >= 70) {
-        scene.remove(enemy.mesh);
-        let id = groundEnemyVector.indexOf(enemy);
-        groundEnemyVector.splice(id,1);
-    }
-    if (enemy.getPositionZ() < 70) {
-        var v = enemy.velocity;
-        enemy.mesh.translateZ(0.2 * v);
-    }
-}
+// function verticalChao(enemy) {
+//     enemy.mesh.updateMatrixWorld(true);
+//     if (enemy.getPositionZ() >= 70) {
+//         scene.remove(enemy.mesh);
+        
+//         let id = groundEnemyVector.indexOf(enemy);
+//         groundEnemyVector.splice(id,1);
+//     }
+//     if (enemy.getPositionZ() < 70) {
+//         var v = enemy.velocity;
+//         enemy.mesh.translateZ(0.2 * v);
+//     }
+// }
 
-function diagonal(enemy) {
-    enemy.mesh.updateMatrixWorld(true);
-    if (enemy.getPositionZ() >= 70) {
-        scene.remove(enemy.mesh);
-        let id = enemyVector.indexOf(enemy);
-        enemyVector.splice(id, 1);
-    }
-    if(enemy.getPositionX() >= 95 || enemy.getPositionX() < -95) {
-        enemy.dir = -enemy.dir
-    }
-    if (enemy.getPositionZ() < 70) {
-        var v = enemy.velocity;
-        var x = enemy.dir;
-        enemy.mesh.translateZ(0.2 * v);
-        enemy.mesh.translateX(0.2 * v * x);
-    }
-}
+// function diagonal(enemy) {
+//     enemy.mesh.updateMatrixWorld(true);
+//     if (enemy.getPositionZ() >= 70) {
+//         scene.remove(enemy.mesh);
+//         enemy.deleteAllBullets(scene);
+//         let id = enemyVector.indexOf(enemy);
+//         enemyVector.splice(id, 1);
+//     } else {
+//         enemy.diagonalMove();
+//     }
+// }
 
 
-const path = new THREE.Path();
-path.absarc(0, 90, degreesToRadians(2360), degreesToRadians(0), degreesToRadians(180), true)
-const points = path.getPoints();
-
-const geometry = new THREE.BufferGeometry().setFromPoints( points );
-const material = new THREE.LineBasicMaterial( { color: 0xffffff } );
-
-const line = new THREE.Line( geometry, material );
-scene.add( line );
-function moveRotate(enemy) {
-    enemy.mesh.updateMatrixWorld(true);
-    if (enemy.getPositionZ() >= 70) {
-        scene.remove(enemy.mesh);
-        let id = enemyVector.indexOf(enemy);
-        // enemyVector.splice(id, 1);
-    }
-    if (enemy.getPositionZ() < 70) {
-        enemy.rotateMove(path);
-    }
-}
+// // const path = new THREE.Path();
+// // path.absarc(0, 90, degreesToRadians(2360), degreesToRadians(0), degreesToRadians(180), true)
+// // const points = path.getPoints();
+// // const geometry = new THREE.BufferGeometry().setFromPoints( points );
+// // const material = new THREE.LineBasicMaterial( { color: 0xffffff } );
+// // const line = new THREE.Line( geometry, material );
+// // scene.add( line );
+// function moveRotate(enemy) {
+//     enemy.mesh.updateMatrixWorld(true);
+//     if (enemy.getPositionZ() <= -200 && enemy.getPositionX() > 39) {
+//         scene.remove(enemy.mesh);
+//         enemy.deleteAllBullets(scene);
+//         let id = enemyVector.indexOf(enemy);
+//         enemyVector.splice(id, 1);
+//     }
+//     if (enemy.getPositionZ() < 70) {
+//         enemy.rotateMove(path);
+//     }
+// }
 //********************************************//
 
 //********************************************//
