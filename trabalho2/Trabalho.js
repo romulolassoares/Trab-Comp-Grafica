@@ -14,6 +14,7 @@ import { default as GroundEnemy } from './classes/GroundEnemy.js';
 import { default as Cura } from './classes/Cura.js';
 
 var scene = new THREE.Scene();    // Create main scene
+var scene2 = new THREE.Scene();    // Create second scene
 
 var renderer = new THREE.WebGLRenderer();
 document.getElementById("webgl-output").appendChild(renderer.domElement);
@@ -56,6 +57,14 @@ camera.position.set(0, 100, 70);
 // camera.position.set(0, 0, 70);
 camera.lookAt(0, 15, 0);
 scene.add(camera);
+
+var lookAtVec   = new THREE.Vector3( 0.0, 15.0, 0.0 );
+var camPosition = new THREE.Vector3( 0, 100, 70 );
+var vcWidth = 400; 
+var vcHeidth = 300; 
+var virtualCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300);
+  virtualCamera.position.copy(camPosition);
+  virtualCamera.lookAt(lookAtVec);
 //********************************************//
 //Criando os planos
 var planos = [];
@@ -78,6 +87,9 @@ function moverPlanos() {
         }
     });
 }
+
+
+
 //********************************************//
 //Para usar o Keyboard
 var keyboard = new KeyboardState();
@@ -130,19 +142,14 @@ function chamaAdversario() {
     if(chance <= 5){
         criarAdversarioChao();
     }
-}
-
-function chamaCura(){
-    var chance = Math.floor(Math.random() * 900) + 1;
-    if (chance <= 100) { // 0.01%
+    if(chance <= 1)
         criarCura();
-    }
 }
 
 function criarCura(){
     let cura = new Cura();
     var newpos = Math.floor(Math.random() * 95) + 1;
-    newpos = 0;
+    //newpos = 0;
     const chance = Math.floor(Math.random() * 2) + 1;
     newpos = chance === 1 ? newpos : -newpos;
     cura.setPosition(newpos);
@@ -418,6 +425,27 @@ render();
 
 document.getElementById("webgl-output").appendChild(stats.domElement);//Pra mostrar o FPS
 
+function controlledRender()
+{
+  var width = window.innerWidth;
+  var height = window.innerHeight;
+
+  // Set main viewport
+  renderer.setViewport(0, 0, width, height); // Reset viewport    
+  renderer.setScissorTest(false); // Disable scissor to paint the entire window
+  renderer.setClearColor("rgb(80, 70, 170)");    
+  renderer.clear();   // Clean the window
+  renderer.render(scene, camera);   
+
+  // Set virtual camera viewport 
+  var offset = 30; 
+  renderer.setViewport(offset, height-vcHeidth-offset, vcWidth, vcHeidth);  // Set virtual camera viewport  
+  renderer.setScissor(offset, height-vcHeidth-offset, vcWidth, vcHeidth); // Set scissor with the same size as the viewport
+  renderer.setScissorTest(true); // Enable scissor to paint only the scissor are (i.e., the small viewport)
+  renderer.setClearColor("rgb(60, 50, 150)");  // Use a darker clear color in the small viewport 
+  renderer.clear(); // Clean the small viewport
+  renderer.render(scene, virtualCamera);  // Render scene of the virtual camera
+}
 
 function render() {
     stats.update();
@@ -434,7 +462,6 @@ function render() {
     chamaAdversario();
     movimentarAdversario();
 
-    chamaCura();
     verticalCura();
 
     enemyVector.forEach(element => {
@@ -457,5 +484,5 @@ function render() {
     }
 
     requestAnimationFrame(render);
-    renderer.render(scene, camera) // Render scene
+    controlledRender();
 }

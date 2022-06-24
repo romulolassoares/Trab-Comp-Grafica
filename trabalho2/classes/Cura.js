@@ -55,7 +55,7 @@ export default class Cura {
     }
 
     setPosition(newpos) {
-        this.mesh.position.set(newpos,20,-100);
+        this.mesh.position.set(newpos,20,-200);
     }
 
     getPositionZ() {
