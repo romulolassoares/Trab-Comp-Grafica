@@ -174,6 +174,19 @@ function verticalCura() {
 }
 
 function criarAdversario() {
+    loader.load('./assets/Spacecraft.glb', function (gltf) {
+        obj = gltf.scene;
+        obj.position.set(0,46,0);
+        obj.name = 'enemy';
+        obj.visible = true;
+        obj.traverse(function (child) {
+            if (child) {
+                child.castShadow = true;
+            }
+        });
+        scene.add(obj);
+        afterload(gltf.scene);
+    }, onProgress, onError);
     let enemy = new Enemy();
     var newpos = Math.floor(Math.random() * 95) + 1;
     //newpos = 0;
