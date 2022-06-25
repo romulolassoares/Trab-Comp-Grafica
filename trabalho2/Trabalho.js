@@ -166,7 +166,6 @@ setTimeout( () => cooldownType4 = false, 20000);
 setTimeout( () => cooldownType5 = false, 6000);
 
 function chamaAdversario() {
-<<<<<<< HEAD
     if(!cooldownType0) {
         cooldownType0 = true;
         setTimeout( () => cooldownType0 = false, 10000);
@@ -183,11 +182,6 @@ function chamaAdversario() {
         cooldownType3 = true;
         setTimeout( () => cooldownType3 = false, 45000);
         criarAdversario(3);
-=======
-    var chance = Math.floor(Math.random() * 900) + 1;
-    if (chance <= 10) { // 0.01%
-        criarAdversario();
->>>>>>> 513eda5a65b27730944603269cf2b7fd6b657d19
     }
     if(!cooldownType4){
         cooldownType4 = true;
