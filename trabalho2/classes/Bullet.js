@@ -7,6 +7,7 @@ export default class Bullet {
    // Public
    position;
    boundingBox = new THREE.Box3();
+   find;
 
    constructor() {
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
@@ -14,6 +15,7 @@ export default class Bullet {
       this.boundingBox.copy(this.mesh.geometry.boundingBox).applyMatrix4(this.mesh.matrixWorld);
       this.mesh.castShadow = true;
       this.mesh.receiveShadow = true;
+      this.find = false;
    }
 
    setPosition(target) {
@@ -30,6 +32,13 @@ export default class Bullet {
 
    getPositionY() {
       return this.mesh.position.y;
+   }
+
+   findPlane(plane) {
+      if(!this.find) {
+         this.mesh.lookAt(plane.position.x, 16, plane.position.z);
+         this.find = true;
+      }
    }
 
 }

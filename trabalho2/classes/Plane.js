@@ -7,10 +7,12 @@ import { degreesToRadians } from '../../libs/util/util.js';
 export default class Plane {
    // Private
    #geometry = new THREE.ConeGeometry(5, 15, 64);
+   // #material;
    #material = new THREE.MeshLambertMaterial({color:'rgb(180,180,255)'});
    //loader = new GLTFLoader();
    // Public
    mesh;
+   obj;
    boundingBox = new THREE.Box3();
    bullets;
    missiles;
@@ -36,6 +38,18 @@ export default class Plane {
       this.vida = 5;
       this.isMortal = true;
       this.canTakeLife = true;
+   }
+
+   setObj(obj) {
+      this.obj = obj;
+   }
+
+   getPositionZ() {
+      return this.mesh.position.z;
+   }
+
+   getPositionX() {
+      return this.mesh.position.x;
    }
 
    getBoundingBox() {
@@ -132,8 +146,9 @@ export default class Plane {
    deletePlane(scene,planeHolder){
       scene.remove(this.mesh);
       scene.remove(this.boundingbox);
-      scene.remove(planeHolder);
+      this.mesh.translateY(-20);
    }
+
    getVida(){
       return this.vida;
    }

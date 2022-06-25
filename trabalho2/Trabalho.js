@@ -86,16 +86,49 @@ function moverPlanos() {
 var keyboard = new KeyboardState();
 //********************************************//
 //Criando o avião
-let mesh;
-var model = new THREE.Object3D();
-var planeClass;
-const loader = new GLTFLoader();
-loader.load( './assets/Airplane.glb', function ( gltf ) {
-    mesh = gltf.mesh;
-});
+// var loader = new GLTFLoader();
+// var obj;
+// var mesh;
+// var material;
+// const afterload = (object) => {
+//     // this.obj = object;
+//     // this.obj.castShadow = true;
+//     object.rotateY(degreesToRadians(-90))
+//     planeClass.setObj(object);
+//     // planeHolder.add(planeClass.obj);
+//     scene.add(object);
+// };
 
-planeClass = new Plane(mesh);
+// loader.load('./assets/Airplane.glb', function (gltf) {
+//     obj = gltf.scene;
+//     // console.log(gltf)
+//     obj.position.set(0,16,0);
+//     mesh = obj.children;
+//     obj.name = 'airplane';
+//     // console.log(mesh);
+//     obj.visible = true;
+//     obj.traverse(function (child) {
+//         if (child) {
+//             child.castShadow = true;
+//             material = child.material;
+//         }
+//     });
+//     // scene.add(obj);
+//     afterload(gltf.scene);
+// }, onProgress, onError);
+
+// function onError() { };
+
+// function onProgress(xhr, model) {
+//     if (xhr.lengthComputable) {
+//         var percentComplete = xhr.loaded / xhr.total * 100;
+//     }
+// }
+// // console.log(xx)
+
+const planeClass = new Plane();
 var planeHolder = new THREE.Object3D();
+// planeHolder.position.set(planeClass.mesh.position);
 planeHolder.add(planeClass.mesh);
 scene.add(planeHolder);
 //********************************************//
@@ -104,6 +137,7 @@ var target = new THREE.Vector3();
 //********************************************//
 // Criando Adversários
 var play = true;
+var passTime = false;
 var enemyVector = [];
 var groundEnemyVector = [];
 var curaVector = [];
@@ -175,55 +209,25 @@ function criarAdversarioChao() {
 // sendo os tipo de movimento: vertical, horizontal, diagonal ...
 function movimentarAdversario() {
     enemyVector.forEach(enemy => {
-        enemy.movimentation = Math.floor(Math.random() * 2);
-        switch (enemy.movimentation) {
-            case 0: vertical(enemy);
-            // case 1: diagonal(enemy);
-            default: ;
-        }
+        let id = enemyVector.indexOf(enemy);
+        enemy.move(enemyVector, id, scene);
     });
     groundEnemyVector.forEach(enemy => {
         verticalChao(enemy);
     })
 }
 
-// Função para mover os inimigos na vertical
-function vertical(enemy) {
-    enemy.mesh.updateMatrixWorld(true);
-    if (enemy.getPositionZ() >= 70) {
-        scene.remove(enemy.mesh);
-        let id = enemyVector.indexOf(enemy);
-        enemyVector.splice(id, 1);
-    }
-    if (enemy.getPositionZ() < 70) {
-        var v = enemy.velocity;
-        enemy.mesh.translateZ(0.2 * v);
-    }
-}
 function verticalChao(enemy) {
     enemy.mesh.updateMatrixWorld(true);
     if (enemy.getPositionZ() >= 70) {
         scene.remove(enemy.mesh);
+        
         let id = groundEnemyVector.indexOf(enemy);
         groundEnemyVector.splice(id,1);
     }
     if (enemy.getPositionZ() < 70) {
         var v = enemy.velocity;
         enemy.mesh.translateZ(0.2 * v);
-    }
-}
-
-function diagonal(enemy) {
-    enemy.mesh.updateMatrixWorld(true);
-    if (enemy.getPositionZ() >= 70 && enemy.getPositionX() >= 95) {
-        scene.remove(enemy.mesh);
-        let id = enemyVector.indexOf(enemy);
-        enemyVector.splice(id, 1);
-    }
-    if (enemy.getPositionX() < 95 || enemy.getPositionZ() < 70) {
-        var v = enemy.velocity;
-        enemy.mesh.translateZ(0.2 * v);
-        enemy.mesh.translateX(0.2 * v);
     }
 }
 //********************************************//
@@ -296,7 +300,7 @@ function colisionMissileEnemy() {
             let missileBox = box2.copy(missile.getBoundingBox()).applyMatrix4( missile.mesh.matrixWorld )
             if(enemyBox.containsBox(missileBox) || enemyBox.intersectsBox(missileBox)) {
                 planeClass.deleteOneMissile(missile, scene);
-                enemy.deleteAllBullets(scene);
+                enemy.deleteAllMissiles(scene);
                 enemy.setIsDead(scene);
             }
         });
@@ -328,6 +332,8 @@ function removePlane(){
         planeClass.mesh.scale.z -=.1;
     }
         planeClass.deletePlane(scene, planeHolder);
+        // planeHolder.geometry.dispose();
+        scene.remove(planeHolder);
         //Parece que a boudingBox ainda ta na cena
 }
 
@@ -389,20 +395,28 @@ function keyboardUpdate() {
     // Keyboard.pressed - execute while is pressed
     planeClass.mesh.getWorldPosition(target);
     if (keyboard.pressed("down")) {
-        if (target.z <= 45)
+        if (target.z <= 45) {
             planeHolder.translateZ(moveDistance);
+            // planeClass.obj.translateX(moveDistance);
+        }
     }
     if (keyboard.pressed("up")) {
-        if (target.z >= -150)
+        if (target.z >= -150) {
             planeHolder.translateZ(-moveDistance);
+            // planeClass.obj.translateX(-moveDistance)
+        }
     }
     if (keyboard.pressed("right")) {
-        if (target.x <= 95)
+        if (target.x <= 95) {
             planeHolder.translateX(moveDistance);
+            // planeClass.obj.translateZ(-moveDistance)
+        }
     }
     if (keyboard.pressed("left")) {
-        if (target.x >= -95)
+        if (target.x >= -95) {
             planeHolder.translateX(-moveDistance);
+            // planeClass.obj.translateZ(moveDistance)
+        }
     }
     if (keyboard.down("G")) {
         planeClass.isMortal = !planeClass.isMortal;
@@ -415,7 +429,7 @@ function keyboardUpdate() {
     if (keyboard.pressed("space") && !cooldownMissile){
         planeClass.createMissiles(scene);
         cooldownMissile = true;
-        setTimeout( () => cooldownMissile = false, 2000);
+        setTimeout( () => cooldownMissile = false, 1200);
     }
     if (keyboard.pressed("enter")){
         play = false;
@@ -424,13 +438,14 @@ function keyboardUpdate() {
             enemy.setIsDead(scene);
         });
         groundEnemyVector.forEach(enemy => {
-            enemy.deleteAllBullets(scene);
+            enemy.deleteAllMissiles(scene);
             enemy.setIsDead(scene);
         });
         curaVector.forEach(cura => {
             cura.setIsCaught();
         });
-        planeHolder.position.set(0,16,0);
+        planeHolder.position.set(0,0,0);
+        planeClass.mesh.position.set(0,16,0);
         resetHealthBar();
         play = true;
     }
@@ -447,8 +462,8 @@ render();
 //********************************************//
 //Gerando viewport da vida
 var vidas = [];
-geometry = new THREE.BoxGeometry(0.75, 1.5, 0.1);
-material = new THREE.MeshLambertMaterial({color:"rgb(0, 165, 0)"});
+var geometry = new THREE.BoxGeometry(0.75, 1.5, 0.1);
+var material = new THREE.MeshLambertMaterial({color:"rgb(0, 165, 0)"});
 for (let i = 0; i < planeClass.vida; i++) {
     vidas[i] = new THREE.Mesh(geometry, material)
     vidas[i].position.set(-i*1.1+5, -200, 20);
@@ -494,26 +509,37 @@ function controlledRender()
 function render() {
     stats.update();
     onWindowResize();
-    keyboardUpdate();
-
-    if(play){
+    
+    if(play && !passTime){
+        keyboardUpdate();
         moverPlanos();
 
         planeClass.moveBullets();
         planeClass.moveMissiles();
         planeClass.deleteBullets(scene);
         planeClass.deleteMissiles(scene);
+
+        verticalCura();
+
         chamaAdversario();
         movimentarAdversario();
-        verticalCura();
+        
         enemyVector.forEach(element => {
-        element.createEnemyShoot(scene);
-        element.moveBullets();
-        if(element.getPositionZ() > 45) {
-            element.deleteAllBullets(scene);
-        }
+            element.createEnemyShoot(scene);
+            element.moveBullets(planeHolder);
+            if(element.getPositionZ() > 45) {
+                element.deleteAllBullets(scene);
+            }
+        });    
 
+        groundEnemyVector.forEach(element => {
+            element.createMissiles(scene);
+            element.moveMissiles(planeHolder);
+            if(element.getPositionZ() > 45) {
+                element.deleteAllMissiles(scene);
+            }
         });
+        //if(acertouaviao) removePlane();
 
         colisionBulletEnemy();
         colisionBulletPlane();
@@ -527,6 +553,13 @@ function render() {
             play = false;
         }
     }
+
+    // console.log(clock.getElapsedTime() + "s")
+    if(clock.getElapsedTime() >= 120) {
+        console.log("Acabou o jogo");
+        passTime = true;
+    }
+    // console.log("Passou " + clock.getDelta() + " tempo")
 
     requestAnimationFrame(render);
     controlledRender();
