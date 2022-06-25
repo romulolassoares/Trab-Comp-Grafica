@@ -105,4 +105,14 @@ export default class Plane {
          array.splice(id, 1);
       })
    }
+
+   getMissiles() {
+      return this.missiles;
+   }
+
+   deleteOneMissile(missile, scene) {
+      let id = this.missiles.indexOf(missile);
+      scene.remove(missile.mesh);
+      this.missiles.splice(id, 1);
+   }
 }

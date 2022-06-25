@@ -56,6 +56,18 @@ export default class Enemy {
          this.#startPosition = new THREE.Vector3(-41.18956708386401,16,-200);
          this.mesh.position.set(-41.18956708386401,16,-200);
          this.obj.position.set(-41.18956708386401,16,-200);
+      } else if(this.moveType == 0) {
+         this.#startPosition = new THREE.Vector3(newpos,16,-200);
+         this.mesh.position.set(newpos,16,-200);
+         this.obj.position.set(newpos,10,-200);
+      } else if(this.moveType == 1) {
+         this.#startPosition = new THREE.Vector3(newpos,16,-200);
+         this.mesh.position.set(newpos,16,-200);
+         this.obj.position.set(newpos,10,-200);
+      } else if(this.moveType == 2) {
+         this.#startPosition = new THREE.Vector3(newpos,16,-200);
+         this.mesh.position.set(newpos,16,-200);
+         this.obj.position.set(newpos,10,-200);
       } else {
          this.#startPosition = new THREE.Vector3(newpos,16,-200);
          this.mesh.position.set(newpos,16,-200);
@@ -157,6 +169,7 @@ export default class Enemy {
       this.obj.updateMatrixWorld(true);
       if (this.getPositionZ() >= 70) {
          scene.remove(this.mesh);
+         scene.remove(this.obj);
          this.deleteAllBullets(scene);
          enemyVector.splice(id, 1);
       } else {
@@ -193,8 +206,10 @@ export default class Enemy {
             var x = this.dir;
             if(this.timeAlive > 0){
                this.mesh.translateX(0.2 * v * x);
+               this.obj.translateX(0.2 * v * x);
             } else {
                this.mesh.translateX(0.2 * v);
+               this.obj.translateX(0.2 * v);
             }
          }
       }
@@ -216,6 +231,7 @@ export default class Enemy {
                this.dir = -1;
             }
             this.mesh.translateZ(0.2 * this.velocity * this.dir);
+            this.obj.translateZ(0.2 * this.velocity * this.dir);
          } else {
             this.t += 0.005;
          

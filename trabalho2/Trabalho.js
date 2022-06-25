@@ -89,10 +89,20 @@ var keyboard = new KeyboardState();
 var loader = new GLTFLoader();
 var obj;
 var material;
+var tecoTecoObj;
+var tieFifhterObj;
+var alienPurpleObj;
 const afterLoadPlane = (object) => {
     planeClass.setObj(object);
     scene.add(object);
     planeHolder = planeClass.obj
+    play = true;
+};
+
+const afterLoadEnemy = (enemy, object) => {
+    let objCopy = new THREE.Object3D().copy(object);
+    enemy.setObj(objCopy);
+    scene.add(objCopy);
     play = true;
 };
 
@@ -127,6 +137,47 @@ loader.load('./assets/ToonTank.glb', function (gltf) {
         }
     });
     // afterLoadPlane(obj);
+}, onProgress, onError);
+
+loader.load('./assets/TecoTeco.glb', function (gltf) {
+    tecoTecoObj = gltf.scene;
+    tecoTecoObj.position.set(0,46,0);
+    tecoTecoObj.scale.set(2,2,2);
+    tecoTecoObj.name = 'enemy';
+    tecoTecoObj.visible = true;
+    tecoTecoObj.traverse(function (child) {
+        if (child) {
+            child.castShadow = true;
+        }
+    });
+}, onProgress, onError);
+
+loader.load('./assets/tieFighter.glb', function (gltf) {
+    tieFifhterObj = gltf.scene;
+    tieFifhterObj.position.set(0,46,0);
+    tieFifhterObj.scale.set(2,2,2);
+    tieFifhterObj.name = 'enemy';
+    tieFifhterObj.visible = true;
+    tieFifhterObj.traverse(function (child) {
+        if (child) {
+            child.castShadow = true;
+        }
+    });
+}, onProgress, onError);
+
+loader.load('./assets/AlienPurple.glb', function (gltf) {
+    alienPurpleObj = gltf.scene;
+    alienPurpleObj.position.set(0,46,0);
+    alienPurpleObj.scale.set(3,3,3);
+    console.log(alienPurpleObj)
+    alienPurpleObj.name = 'enemy';
+    alienPurpleObj.visible = true;
+    alienPurpleObj.traverse(function (child) {
+        if (child) {
+            child.castShadow = true;
+        }
+    alienPurpleObj.children.splice(5,1);
+    });
 }, onProgress, onError);
 
 function onError() { };
@@ -185,7 +236,7 @@ function chamaAdversario() {
     }
     if(!cooldownType4){
         cooldownType4 = true;
-        setTimeout( () => cooldownType4 = false, 0);
+        setTimeout( () => cooldownType4 = false, 30000);
         criarAdversarioChao();
     }
     if(!cooldownType5) {
@@ -220,28 +271,19 @@ function verticalCura() {
     });
 }
 
-var enemyobject;
-const afterLoadEnemy = (enemy, object) => {
-    let objCopy = new THREE.Object3D().copy(object);
-    enemy.setObj(objCopy);
-    scene.add(objCopy);
-    play = true;
-};
-loader.load('./assets/TecoTeco.glb', function (gltf) {
-    enemyobject = gltf.scene;
-    enemyobject.position.set(0,46,0);
-    enemyobject.name = 'enemy';
-    enemyobject.visible = true;
-    enemyobject.traverse(function (child) {
-        if (child) {
-            child.castShadow = true;
-        }
-    });
-}, onProgress, onError);
-
 function criarAdversario(type) {
     let enemy = new Enemy(type);
-    afterLoadEnemy(enemy, enemyobject);
+    if(enemy.moveType === 0) {
+        afterLoadEnemy(enemy, tecoTecoObj);
+    } else if(enemy.moveType === 1) {
+        afterLoadEnemy(enemy, tecoTecoObj);
+    } else if(enemy.moveType === 2) {
+        afterLoadEnemy(enemy, alienPurpleObj);
+    } else if(enemy.moveType === 3) {
+        afterLoadEnemy(enemy, tieFifhterObj);
+    }
+
+    
     var newpos = Math.floor(Math.random() * 95) + 1;
     const chance = Math.floor(Math.random() * 2) + 1;
     newpos = chance === 1 ? newpos : -newpos;
@@ -364,6 +406,22 @@ function colisionMissileEnemy() {
         });
     });
 }
+function colisionMissilePlane() {
+    groundEnemyVector.forEach(enemy => {
+        let missiles = enemy.getMissiles();
+        let planeBox = box.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
+        missiles.forEach(missile => {
+            let missileBox = box2.copy(missile.getBoundingBox()).applyMatrix4( missile.mesh.matrixWorld )
+            if(planeBox.containsBox(missileBox) || planeBox.intersectsBox(missileBox)) {
+                enemy.deleteOneMissile(missile, scene);
+                if(planeClass.isMortal){
+                    planeClass.damage(1);
+                    takeOneHealthBar();
+                }
+            }
+        });
+    });
+}
 function colisionCuraPlane() {
     curaVector.forEach(cura => {
         let planeBox = box3.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
@@ -404,10 +462,14 @@ function animation() {
                 enemy.mesh.scale.x -=.1;
                 enemy.mesh.scale.y -=.1;
                 enemy.mesh.scale.z -=.1;
+                enemy.obj.scale.x -=.1;
+                enemy.obj.scale.y -=.1;
+                enemy.obj.scale.z -=.1;
             }
             if(enemy.mesh.scale.x <= 0) {
                 let idEnemy = enemyVector.indexOf(enemy);
                 scene.remove(enemy.mesh);
+                scene.remove(enemy.obj);
                 enemyVector.splice(idEnemy, 1);
             }
         }
@@ -617,6 +679,7 @@ function render() {
         colisionPlaneEnemy();
         colisionMissileEnemy();
         colisionCuraPlane();
+        colisionMissilePlane();
         animation();
 
         if(planeClass.vida <= 0){
