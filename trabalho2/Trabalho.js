@@ -51,8 +51,8 @@ function setDirectionalLighting(position) {
 //********************************************//
 //Criando a camera
 var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300);
-// camera.position.set(0, 100, 70);
-camera.position.set(0, 20, 70);
+camera.position.set(0, 100, 70);
+// camera.position.set(0, 20, 70);
 camera.lookAt(0, 15, 0);
 scene.add(camera);
 
@@ -135,7 +135,7 @@ var curaVector = [];
 // função para limitar quantos inimigos tem na tela
 function chamaAdversario() {
     var chance = Math.floor(Math.random() * 900) + 1;
-    if (chance <= 0) { // 0.01%
+    if (chance <= 10) { // 0.01%
         criarAdversario();
     }
     if(chance <= 0){
@@ -170,21 +170,27 @@ function verticalCura() {
     });
 }
 
+var enemyobject;
+const afterLoadEnemy = (enemy, object) => {
+    enemy.setObj(object);
+    scene.add(object);
+    play = true;
+};
+loader.load('./assets/TecoTeco.glb', function (gltf) {
+    enemyobject = gltf.scene;
+    enemyobject.position.set(0,46,0);
+    enemyobject.name = 'enemy';
+    enemyobject.visible = true;
+    enemyobject.traverse(function (child) {
+        if (child) {
+            child.castShadow = true;
+        }
+    });
+}, onProgress, onError);
+
 function criarAdversario() {
-    loader.load('./assets/Spacecraft.glb', function (gltf) {
-        obj = gltf.scene;
-        obj.position.set(0,46,0);
-        obj.name = 'enemy';
-        obj.visible = true;
-        obj.traverse(function (child) {
-            if (child) {
-                child.castShadow = true;
-            }
-        });
-        scene.add(obj);
-        afterload(gltf.scene);
-    }, onProgress, onError);
     let enemy = new Enemy();
+    afterLoadEnemy(enemy, enemyobject);
     var newpos = Math.floor(Math.random() * 95) + 1;
     //newpos = 0;
     const chance = Math.floor(Math.random() * 2) + 1;
