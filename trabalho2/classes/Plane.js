@@ -6,7 +6,7 @@ import { degreesToRadians } from '../../libs/util/util.js';
 
 export default class Plane {
    // Private
-   #geometry = new THREE.ConeGeometry(5, 15, 64);
+   #geometry = new THREE.ConeGeometry(6, 20, 64);
    // #material;
    #material = new THREE.MeshLambertMaterial({color:'rgb(180,180,255)'});
    //loader = new GLTFLoader();
@@ -26,7 +26,7 @@ export default class Plane {
       this.mesh = aviao;
       // this.mesh.scale.set(5,5,5);
       this.mesh.position.set(0,20,0);
-      this.mesh.castShadow = true;
+      // this.mesh.castShadow = true;
       this.mesh.rotateX(degreesToRadians(-90));
       // this.mesh.geometry.computeBoundingBox();
       // this.boundingBox
@@ -42,6 +42,14 @@ export default class Plane {
 
    setObj(obj) {
       this.obj = obj;
+      this.obj.position.set(0,20,0);
+      this.obj.castShadow = true;
+      this.obj.rotateY(degreesToRadians(-90))
+      this.boundingBox = new THREE.Box3().setFromObject(this.obj);
+      // console.log(this.obj.isObject3D)
+      // this.boundingBox
+      //    .copy(this.obj.geometry.boundingBox)
+      //    .applyMatrix4(this.obj.matrixWorld);
    }
 
    getPositionZ() {
@@ -66,7 +74,7 @@ export default class Plane {
    // Função para criar um tiro
    createShoot(scene) {
       let bullet = new Bullet();
-      this.mesh.getWorldPosition(this.target);
+      this.obj.getWorldPosition(this.target);
       bullet.setPosition(this.target);
       scene.add(bullet.mesh);
       this.bullets.push(bullet);
@@ -98,7 +106,7 @@ export default class Plane {
 
    createMissiles(scene) {
       let missile = new Missile();
-      this.mesh.getWorldPosition(this.target);
+      this.obj.getWorldPosition(this.target);
       missile.setPosition(this.target);
       missile.mesh.rotateX(1.35);
       this.missiles.push(missile);

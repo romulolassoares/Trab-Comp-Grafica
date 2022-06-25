@@ -86,57 +86,50 @@ function moverPlanos() {
 var keyboard = new KeyboardState();
 //********************************************//
 //Criando o avião
-// var loader = new GLTFLoader();
-// var obj;
-// var mesh;
-// var material;
-// const afterload = (object) => {
-//     // this.obj = object;
-//     // this.obj.castShadow = true;
-//     object.rotateY(degreesToRadians(-90))
-//     planeClass.setObj(object);
-//     // planeHolder.add(planeClass.obj);
-//     scene.add(object);
-// };
+var loader = new GLTFLoader();
+var obj;
+var material;
+const afterload = (object) => {
+    planeClass.setObj(object);
+    scene.add(object);
+    planeHolder = planeClass.obj
+    play = true;
+};
 
-// loader.load('./assets/Airplane.glb', function (gltf) {
-//     obj = gltf.scene;
-//     // console.log(gltf)
-//     obj.position.set(0,16,0);
-//     mesh = obj.children;
-//     obj.name = 'airplane';
-//     // console.log(mesh);
-//     obj.visible = true;
-//     obj.traverse(function (child) {
-//         if (child) {
-//             child.castShadow = true;
-//             material = child.material;
-//         }
-//     });
-//     // scene.add(obj);
-//     afterload(gltf.scene);
-// }, onProgress, onError);
+loader.load('./assets/Airplane.glb', function (gltf) {
+    obj = gltf.scene;
+    obj.position.set(0,46,0);
+    obj.name = 'airplane';
+    obj.visible = true;
+    obj.traverse(function (child) {
+        if (child) {
+            child.castShadow = true;
+        }
+    });
+    // scene.add(obj);
+    afterload(gltf.scene);
+}, onProgress, onError);
 
-// function onError() { };
+function onError() { };
 
-// function onProgress(xhr, model) {
-//     if (xhr.lengthComputable) {
-//         var percentComplete = xhr.loaded / xhr.total * 100;
-//     }
-// }
-// // console.log(xx)
+function onProgress(xhr, model) {
+    if (xhr.lengthComputable) {
+        var percentComplete = xhr.loaded / xhr.total * 100;
+    }
+}
+
 
 const planeClass = new Plane();
 var planeHolder = new THREE.Object3D();
 // planeHolder.position.set(planeClass.mesh.position);
-planeHolder.add(planeClass.mesh);
+// planeHolder.add(planeClass.mesh);
 scene.add(planeHolder);
 //********************************************//
 var target = new THREE.Vector3();
 
 //********************************************//
 // Criando Adversários
-var play = true;
+var play = false;
 var passTime = false;
 var enemyVector = [];
 var groundEnemyVector = [];
@@ -396,25 +389,29 @@ function keyboardUpdate() {
     planeClass.mesh.getWorldPosition(target);
     if (keyboard.pressed("down")) {
         if (target.z <= 45) {
-            planeHolder.translateZ(moveDistance);
+            // planeHolder.translateZ(moveDistance);
+            planeHolder.translateX(moveDistance);
             // planeClass.obj.translateX(moveDistance);
         }
     }
     if (keyboard.pressed("up")) {
         if (target.z >= -150) {
-            planeHolder.translateZ(-moveDistance);
+            // planeHolder.translateZ(-moveDistance);
+            planeHolder.translateX(-moveDistance);
             // planeClass.obj.translateX(-moveDistance)
         }
     }
     if (keyboard.pressed("right")) {
         if (target.x <= 95) {
-            planeHolder.translateX(moveDistance);
+            // planeHolder.translateX(moveDistance);
+            planeHolder.translateZ(-moveDistance);
             // planeClass.obj.translateZ(-moveDistance)
         }
     }
     if (keyboard.pressed("left")) {
         if (target.x >= -95) {
-            planeHolder.translateX(-moveDistance);
+            // planeHolder.translateX(-moveDistance);
+            planeHolder.translateZ(moveDistance);
             // planeClass.obj.translateZ(moveDistance)
         }
     }
@@ -557,7 +554,7 @@ function render() {
     // console.log(clock.getElapsedTime() + "s")
     if(clock.getElapsedTime() >= 120) {
         console.log("Acabou o jogo");
-        passTime = true;
+        // passTime = true;
     }
     // console.log("Passou " + clock.getDelta() + " tempo")
 
