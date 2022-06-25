@@ -75,49 +75,32 @@ export default class Plane {
       }
    }
 
-   moveMissiles(planeTarget) {
+   moveMissiles(plane) {
       let array = this.missiles;
       array.forEach(element => {
+         let altura = false;
          let v = this.velocity;
-         // element.mesh.translateZ(v*0.3);
-         if(element.getPositionY() <= 16) {
+         if(element.getPositionY() != 16 && !altura) {
             element.mesh.translateY(.5);
+            
          } else {
-            // element.mesh.rotateX(degreesToRadians(90));
-            // element.mesh.translateY(v*.5);
-            if(element.mesh.rotation.x != 1.5707963267948963) {
+            altura = true;
+            if(element.mesh.rotation.x < degreesToRadians(89)) {
+               element.findPlane(plane);
                element.mesh.rotateX(degreesToRadians(90));
-            } else if (element.mesh.rotation.x == 1.5707963267948963) {
-               // element.mesh.lookAt(planeTarget);
+            } else {
                element.mesh.translateY(v*.5);
             }
          }
       });
    }
 
-    // if(cylinder.position.y <= 5 && canMove) {
-  //   moveGroundMissile();
-  // } else {
-  //   if(cylinder.rotation.x != 1.5707963267948963) {
-  //     canMove = false;
-  //     cylinder.rotateX(degreesToRadians((90/6)));
-  //     cylinder.translateZ(0.01);
-  //   } else if(cylinder.rotation.x == 1.5707963267948963) {
-  //     // cylinder.rotateY(degreesToRadians(45));
-  //     // moveGroundMissile();
-  //     findEnemy();
-  //   }
-  // }
-
    deleteAllMissiles(scene) {
       let array = this.missiles;
       array.forEach(element => {
          scene.remove(element.mesh);
-         // let id = array.indexOf(element);
-         // array.splice(id, 1);
       })
       array.forEach(element => {
-         // scene.remove(element.mesh);
          let id = array.indexOf(element);
          array.splice(id, 1);
       })

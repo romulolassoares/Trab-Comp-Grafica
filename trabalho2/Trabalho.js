@@ -101,43 +101,45 @@ var loader = new GLTFLoader();
 var obj;
 var mesh;
 var material;
-const afterload = (object) => {
-    // this.obj = object;
-    // this.obj.castShadow = true;
-    object.rotateY(degreesToRadians(-90))
-    planeClass.setObj(object);
-    // planeHolder.add(planeClass.obj);
-    scene.add(object);
-};
+// const afterload = (object) => {
+//     // this.obj = object;
+//     // this.obj.castShadow = true;
+//     object.rotateY(degreesToRadians(-90))
+//     planeClass.setObj(object);
+//     // planeHolder.add(planeClass.obj);
+//     scene.add(object);
+// };
 
-loader.load('./assets/Airplane.glb', function (gltf) {
-    obj = gltf.scene;
-    // console.log(gltf)
-    obj.position.set(0,16,0);
-    mesh = obj.children;
-    obj.name = 'airplane';
-    // console.log(mesh);
-    obj.visible = true;
-    obj.traverse(function (child) {
-        if (child) {
-            child.castShadow = true;
-            material = child.material;
-        }
-    });
-    // scene.add(obj);
-    afterload(gltf.scene);
-}, onProgress, onError);
+// loader.load('./assets/Airplane.glb', function (gltf) {
+//     obj = gltf.scene;
+//     // console.log(gltf)
+//     obj.position.set(0,16,0);
+//     mesh = obj.children;
+//     obj.name = 'airplane';
+//     // console.log(mesh);
+//     obj.visible = true;
+//     obj.traverse(function (child) {
+//         if (child) {
+//             child.castShadow = true;
+//             material = child.material;
+//         }
+//     });
+//     // scene.add(obj);
+//     afterload(gltf.scene);
+// }, onProgress, onError);
 
-function onError() { };
+// function onError() { };
 
-function onProgress(xhr, model) {
-    if (xhr.lengthComputable) {
-        var percentComplete = xhr.loaded / xhr.total * 100;
-    }
-}
-// console.log(xx)
+// function onProgress(xhr, model) {
+//     if (xhr.lengthComputable) {
+//         var percentComplete = xhr.loaded / xhr.total * 100;
+//     }
+// }
+// // console.log(xx)
+
 const planeClass = new Plane(material);
 var planeHolder = new THREE.Object3D();
+// planeHolder.position.set(planeClass.mesh.position);
 planeHolder.add(planeClass.mesh);
 scene.add(planeHolder);
 //********************************************//
@@ -156,10 +158,10 @@ function chamaAdversario() {
     if (chance <= 0) { // 0.01%
         criarAdversario();
     }
-    if(chance <= 0){
+    if(chance <= 20){
         criarAdversarioChao();
     }
-    if(chance <= 1)
+    if(chance <= 4)
         criarCura();
 }
 
@@ -331,7 +333,7 @@ function colisionPlaneEnemy(){
             enemy.setIsDead(scene);
             console.log(planeClass.vida);
             if(planeClass.getIsMortal())
-                planeClass.damage(0.2);
+                planeClass.damage(2);
         }
     });
 }
@@ -454,25 +456,25 @@ function keyboardUpdate() {
     if (keyboard.pressed("down")) {
         if (target.z <= 45) {
             planeHolder.translateZ(moveDistance);
-            planeClass.obj.translateX(moveDistance);
+            // planeClass.obj.translateX(moveDistance);
         }
     }
     if (keyboard.pressed("up")) {
         if (target.z >= -150) {
             planeHolder.translateZ(-moveDistance);
-            planeClass.obj.translateX(-moveDistance)
+            // planeClass.obj.translateX(-moveDistance)
         }
     }
     if (keyboard.pressed("right")) {
         if (target.x <= 95) {
             planeHolder.translateX(moveDistance);
-            planeClass.obj.translateZ(-moveDistance)
+            // planeClass.obj.translateZ(-moveDistance)
         }
     }
     if (keyboard.pressed("left")) {
         if (target.x >= -95) {
             planeHolder.translateX(-moveDistance);
-            planeClass.obj.translateZ(moveDistance)
+            // planeClass.obj.translateZ(moveDistance)
         }
     }
     if (keyboard.down("G")) {
@@ -560,7 +562,7 @@ function render() {
 
     enemyVector.forEach(element => {
         element.createEnemyShoot(scene);
-        element.moveBullets();
+        element.moveBullets(planeHolder);
         if(element.getPositionZ() > 45) {
             element.deleteAllBullets(scene);
         }
@@ -568,7 +570,7 @@ function render() {
 
     groundEnemyVector.forEach(element => {
         element.createMissiles(scene);
-        element.moveMissiles(planeClass.target);
+        element.moveMissiles(planeHolder);
         if(element.getPositionZ() > 45) {
             element.deleteAllMissiles(scene);
         }

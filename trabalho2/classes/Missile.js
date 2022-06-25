@@ -33,4 +33,11 @@ export default class Missile {
    getBoundingBox() {
       return this.boundingBox;
    }
+
+   findPlane(plane) {
+      if(!this.find) {
+         this.mesh.lookAt(plane.position.x, 16, plane.position.z);
+         this.find = true;
+      }
+   }
 }

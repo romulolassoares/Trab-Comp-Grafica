@@ -89,14 +89,15 @@ export default class Plane {
       }
    }
 
-   moveBullets() {
+   moveBullets(plane) {
       let array = this.bullets;
       array.forEach(element => {
+         element.findPlane(plane);
          let v = this.velocity;
          element.mesh.translateZ(v*0.3);
       });
    }
-
+   
    deleteAllBullets(scene) {
       this.canShoot = false;
       let array = this.bullets;

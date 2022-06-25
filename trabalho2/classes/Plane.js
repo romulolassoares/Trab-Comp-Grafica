@@ -20,7 +20,7 @@ export default class Plane {
    isMortal;
     
    
-   constructor(material) {
+   constructor() {
       // this.loader.load('./assets/ToonTank.glb', function (gltf) {
       //  this.mesh = gltf.asset;    
       //  this.mesh.visible = true;
@@ -40,7 +40,7 @@ export default class Plane {
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
       this.mesh.opacity = 0;
       this.mesh.position.set(0,16,0);
-      // this.mesh.castShadow = true;
+      this.mesh.castShadow = true;
       this.mesh.rotateX(-1.6);
       this.mesh.geometry.computeBoundingBox();
       this.boundingBox
@@ -55,6 +55,14 @@ export default class Plane {
 
    setObj(obj) {
       this.obj = obj;
+   }
+
+   getPositionZ() {
+      return this.mesh.position.z;
+   }
+
+   getPositionX() {
+      return this.mesh.position.x;
    }
 
    getBoundingBox() {
@@ -135,7 +143,10 @@ export default class Plane {
    }
 
    damage(dano){
-      this.vida -= dano;
+      this.vida = this.vida - dano;
+      this.isMortal = false;
+      setTimeout( () => this.isMortal = true, 200);
+      console.log(this.vida)
    }
    
    recover(life){
