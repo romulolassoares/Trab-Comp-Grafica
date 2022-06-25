@@ -13,6 +13,7 @@ export default class Plane {
    #material = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
    // Public
    mesh;
+   obj;
    boundingBox = new THREE.Box3();
    velocity;
    isDead;
@@ -25,6 +26,8 @@ export default class Plane {
    constructor() {
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
       this.mesh.geometry.computeBoundingBox();
+      this.mesh.material.transparent = true;
+      this.mesh.material.opacity = 0;
       // this.mesh.position.set(newpos,10,-200);
       this.boundingBox.copy(this.mesh.geometry.boundingBox).applyMatrix4(this.mesh.matrixWorld);
       this.isDead = false;
@@ -37,8 +40,15 @@ export default class Plane {
       this.mesh.receiveShadow = true;
    }
 
+   setObj(obj) {
+      this.obj = obj;
+      this.obj.castShadow = true;
+      // this.obj.rotateY(degreesToRadians(-90));
+   }
+
    setPosition(newpos) {
       this.mesh.position.set(newpos,6,-200);
+      this.obj.position.set(newpos,6,-200);
    }
 
    setVelocity(vel) {
@@ -114,5 +124,21 @@ export default class Plane {
       let id = this.missiles.indexOf(missile);
       scene.remove(missile.mesh);
       this.missiles.splice(id, 1);
+   }
+
+   verticalChaoMove(groundEnemyVector, id ,scene) {
+      this.mesh.updateMatrixWorld(true);
+      if (this.getPositionZ() >= 70) {
+          scene.remove(this.mesh);
+          scene.remove(this.obj);
+          
+          let id = groundEnemyVector.indexOf(this);
+          groundEnemyVector.splice(id,1);
+      }
+      if (this.getPositionZ() < 70) {
+          var v = this.velocity;
+          this.mesh.translateZ(0.2 * v);
+          this.obj.translateZ(0.2 * v);
+      }
    }
 }
