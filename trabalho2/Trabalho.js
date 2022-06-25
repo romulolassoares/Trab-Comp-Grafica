@@ -96,6 +96,13 @@ const afterLoadPlane = (object) => {
     play = true;
 };
 
+const afterLoadGroundEnemy = (enemy, object) => {
+    enemy.setObj(object);
+    scene.add(object);
+    planeHolder = enemy.obj
+    play = true;
+};
+
 loader.load('./assets/Airplane.glb', function (gltf) {
     obj = gltf.scene;
     obj.position.set(0,46,0);
@@ -107,6 +114,19 @@ loader.load('./assets/Airplane.glb', function (gltf) {
         }
     });
     afterLoadPlane(obj);
+}, onProgress, onError);
+
+loader.load('./assets/ToonTank.glb', function (gltf) {
+    obj = gltf.scene;
+    obj.position.set(0,46,0);
+    obj.name = 'airplane';
+    obj.visible = true;
+    obj.traverse(function (child) {
+        if (child) {
+            child.castShadow = true;
+        }
+    });
+    // afterLoadPlane(obj);
 }, onProgress, onError);
 
 function onError() { };
@@ -133,16 +153,46 @@ var groundEnemyVector = [];
 var curaVector = [];
 
 // função para limitar quantos inimigos tem na tela
+var cooldownType0 = false;
+var cooldownType1 = true;
+var cooldownType2 = true;
+var cooldownType3 = true;
+var cooldownType4 = true;
+var cooldownType5 = true;
+setTimeout( () => cooldownType1 = false, 5000);
+setTimeout( () => cooldownType2 = false, 8000);
+setTimeout( () => cooldownType3 = false, 12000);
+setTimeout( () => cooldownType4 = false, 20000);
+setTimeout( () => cooldownType5 = false, 6000);
+
 function chamaAdversario() {
-    var chance = Math.floor(Math.random() * 900) + 1;
-    if (chance <= 10) { // 0.01%
-        criarAdversario();
+    if(!cooldownType0) {
+        cooldownType0 = true;
+        setTimeout( () => cooldownType0 = false, 10000);
+        criarAdversario(0);
+    } else if (!cooldownType1) {
+        cooldownType1 = true;
+        setTimeout( () => cooldownType1 = false, 25000);
+        criarAdversario(1);
+    } else if (!cooldownType2) {
+        cooldownType2 = true;
+        setTimeout( () => cooldownType2 = false, 50000);
+        criarAdversario(2);
+    } else if (!cooldownType3) {
+        cooldownType3 = true;
+        setTimeout( () => cooldownType3 = false, 45000);
+        criarAdversario(3);
     }
-    if(chance <= 0){
+    if(!cooldownType4){
+        cooldownType4 = true;
+        setTimeout( () => cooldownType4 = false, 30000);
         criarAdversarioChao();
     }
-    if(chance <= 0)
+    if(!cooldownType5) {
+        cooldownType5 = true;
+        setTimeout( () => cooldownType5 = false, 10000);
         criarCura();
+    }
 }
 
 function criarCura(){
@@ -188,11 +238,10 @@ loader.load('./assets/TecoTeco.glb', function (gltf) {
     });
 }, onProgress, onError);
 
-function criarAdversario() {
-    let enemy = new Enemy();
+function criarAdversario(type) {
+    let enemy = new Enemy(type);
     afterLoadEnemy(enemy, enemyobject);
     var newpos = Math.floor(Math.random() * 95) + 1;
-    //newpos = 0;
     const chance = Math.floor(Math.random() * 2) + 1;
     newpos = chance === 1 ? newpos : -newpos;
     enemy.setPosition(newpos);
@@ -269,7 +318,6 @@ function colisionPlaneEnemy(){
         }
     });
 }
-
 // Bug -> não deleta todos os tiros de um inimigo da tela
 function colisionBulletEnemy() {
     let bullets = planeClass.getBullets();
@@ -315,7 +363,6 @@ function colisionMissileEnemy() {
         });
     });
 }
-
 function colisionCuraPlane() {
     curaVector.forEach(cura => {
         let planeBox = box3.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
@@ -435,18 +482,24 @@ function keyboardUpdate() {
             planeClass.moveLeft(moveDistance);
         }
     }
+    if (keyboard.up("right")) {
+        planeClass.obj.rotateX(degreesToRadians(12));
+    }
+    if (keyboard.up("left")) {
+        planeClass.obj.rotateX(degreesToRadians(-12));
+    }
     if (keyboard.down("G")) {
         planeClass.isMortal = !planeClass.isMortal;
     }
     if (keyboard.pressed("ctrl") && !cooldownBullet){
         planeClass.createShoot(scene);
         cooldownBullet = true;
-        setTimeout( () => cooldownBullet = false, 2000);
+        setTimeout( () => cooldownBullet = false, 1000);
     }
     if (keyboard.pressed("space") && !cooldownMissile){
         planeClass.createMissiles(scene);
         cooldownMissile = true;
-        setTimeout( () => cooldownMissile = false, 1200);
+        setTimeout( () => cooldownMissile = false, 2000);
     }
     if (keyboard.pressed("enter")){
         play = false;

@@ -71,7 +71,7 @@ export default class Plane {
          this.missiles.push(missile);
          scene.add(missile.mesh);
          this.missileCooldown = true;
-         setTimeout( () => this.missileCooldown = false, 1600);
+         setTimeout( () => this.missileCooldown = false, 10000);
       }
    }
 
@@ -89,7 +89,7 @@ export default class Plane {
                element.findPlane(plane);
                element.mesh.rotateX(degreesToRadians(90));
             } else {
-               element.mesh.translateY(v*.5);
+               element.mesh.translateY(v*.3);
             }
          }
       });
