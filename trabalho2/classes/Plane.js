@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { default as Bullet } from './Bullet.js';
 import { default as Missile } from './Missile.js';
 import { GLTFLoader } from '../../build/jsm/loaders/GLTFLoader.js';
+import { degreesToRadians } from '../../libs/util/util.js';
 
 export default class Plane {
    // Private
@@ -18,30 +19,15 @@ export default class Plane {
    target;
    vida;
    isMortal;
+   canTakeLife;
     
-   
    constructor() {
-      // this.loader.load('./assets/ToonTank.glb', function (gltf) {
-      //  this.mesh = gltf.asset;    
-      //  this.mesh.visible = true;
-      //  this.mesh.traverse(function (child) {
-      //      if (child) {
-      //          child.castShadow = true;
-      //          child.receiveShadow = true;
-      //      }
-      //  });
-      // }, 
-      // function onError() { }, 
-      // function onProgress(xhr, model) {
-      //     if (xhr.lengthComputable) {
-      //         var percentComplete = xhr.loaded / xhr.total * 100;
-      //     }
-      // });
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
-      this.mesh.opacity = 0;
-      this.mesh.position.set(0,16,0);
+      // this.mesh = aviao;
+      // this.mesh.scale.set(5,5,5);
+      this.mesh.position.set(0,20,0);
       this.mesh.castShadow = true;
-      this.mesh.rotateX(-1.6);
+      this.mesh.rotateX(degreesToRadians(-90));
       this.mesh.geometry.computeBoundingBox();
       this.boundingBox
          .copy(this.mesh.geometry.boundingBox)
@@ -49,8 +35,9 @@ export default class Plane {
       this.bullets = [];
       this.missiles = [];
       this.target = new THREE.Vector3();
-      this.vida = 10;
+      this.vida = 5;
       this.isMortal = true;
+      this.canTakeLife = true;
    }
 
    setObj(obj) {
@@ -143,15 +130,17 @@ export default class Plane {
    }
 
    damage(dano){
-      this.vida = this.vida - dano;
+      this.vida -= dano;
       this.isMortal = false;
-      setTimeout( () => this.isMortal = true, 200);
-      console.log(this.vida)
+      setTimeout( () => this.isMortal = true, 1000);
    }
    
    recover(life){
-      if(this.vida < 10)
+      if(this.vida < 5){
          this.vida += life;
+         this.canTakeLife = false;
+         setTimeout( () => this.canTakeLife = true, 1000);
+      }
    }
 
    deletePlane(scene,planeHolder){
@@ -167,5 +156,4 @@ export default class Plane {
    getIsMortal(){
       return this.isMortal;
    }
-   
 }

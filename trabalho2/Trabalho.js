@@ -5,7 +5,7 @@ import KeyboardState from '../libs/util/KeyboardState.js'
 import {
     onWindowResize,
     degreesToRadians,
-    createGroundPlane
+    createGroundPlaneWired
 } from "../libs/util/util.js";
 
 import { default as Plane } from './classes/Plane.js';
@@ -14,19 +14,17 @@ import { default as GroundEnemy } from './classes/GroundEnemy.js';
 import { default as Cura } from './classes/Cura.js';
 
 var scene = new THREE.Scene();    // Create main scene
-var scene2 = new THREE.Scene();    // Create second scene
 
-var renderer = new THREE.WebGLRenderer();
+var renderer = new THREE.WebGLRenderer({alpha: true});
 document.getElementById("webgl-output").appendChild(renderer.domElement);
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.VSMShadowMap; // default
+renderer.autoClear = false;
 
 var clock = new THREE.Clock();
 clock.start();
 var stats = new Stats(); //Pra ver os status do FPS
-// initDefaultBasicLight(scene);
-// var renderer = initRenderer();
 //********************************************//
 // Criando a luz
 var position = new THREE.Vector3(0, 100, 100);
@@ -54,28 +52,22 @@ function setDirectionalLighting(position) {
 //Criando a camera
 var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300);
 camera.position.set(0, 100, 70);
-// camera.position.set(0, 0, 70);
+// camera.position.set(0, 20, 70);
 camera.lookAt(0, 15, 0);
 scene.add(camera);
 
-var lookAtVec   = new THREE.Vector3( 0.0, 0, -15.0 );
-var lookUp   = new THREE.Vector3( 0.0, 1, 0 );
-var camPosition = new THREE.Vector3( 0, -15, 0 );
+var camPosition = new THREE.Vector3( 0, -200, 30 );
 var vcWidth = 400; 
 var vcHeidth = 300; 
-var virtualCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300);
+var virtualCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300); 
   virtualCamera.position.copy(camPosition);
-  virtualCamera.up.copy(lookUp);
-  virtualCamera.lookAt(lookAtVec);
+  scene.add(virtualCamera);
 //********************************************//
 //Criando os planos
 var planos = [];
 
 for (let i = 0; i < 3; i++) {
-    planos[i] = createGroundPlane(800.0, 200.0, 60, 60, "rgb(160,160,160)");
-    //planos[i] = createGroundPlane(800, 200);
-    //Usar o rotate para se for plano sem ser wired
-    planos[i].rotateX(degreesToRadians(-90));
+    planos[i] = createGroundPlaneWired(800.0, 200.0);
     planos[i].position.set(0, 0, i * -100);
     planos[i].receiveShadow = true;
     scene.add(planos[i]);
@@ -89,18 +81,15 @@ function moverPlanos() {
         }
     });
 }
-
-
-
 //********************************************//
 //Para usar o Keyboard
 var keyboard = new KeyboardState();
 //********************************************//
 //Criando o avião
-var loader = new GLTFLoader();
-var obj;
-var mesh;
-var material;
+// var loader = new GLTFLoader();
+// var obj;
+// var mesh;
+// var material;
 // const afterload = (object) => {
 //     // this.obj = object;
 //     // this.obj.castShadow = true;
@@ -137,7 +126,7 @@ var material;
 // }
 // // console.log(xx)
 
-const planeClass = new Plane(material);
+const planeClass = new Plane();
 var planeHolder = new THREE.Object3D();
 // planeHolder.position.set(planeClass.mesh.position);
 planeHolder.add(planeClass.mesh);
@@ -147,7 +136,7 @@ var target = new THREE.Vector3();
 
 //********************************************//
 // Criando Adversários
-var createEnemy = true;
+var play = true;
 var enemyVector = [];
 var groundEnemyVector = [];
 var curaVector = [];
@@ -168,7 +157,7 @@ function chamaAdversario() {
 function criarCura(){
     let cura = new Cura();
     var newpos = Math.floor(Math.random() * 95) + 1;
-    newpos = 0;
+    //newpos = 0;
     const chance = Math.floor(Math.random() * 2) + 1;
     newpos = chance === 1 ? newpos : -newpos;
     cura.setPosition(newpos);
@@ -317,23 +306,27 @@ function verticalChao(enemy) {
 const box = new THREE.Box3();
 const box2 = new THREE.Box3();
 const box3 = new THREE.Box3();
-var acertouaviao = false;
 
 /**
  * Função para validar se ocorreu colisão entre os tiros e os inimigos.
  * Caso ocorra uma colisão o tiro e o inimigo são removidos da tela.
  */
+var del = 0;
 function colisionPlaneEnemy(){
     enemyVector.forEach(enemy => {
         let planeBox = box3.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
         let enemyBox = box.copy(enemy.getBoundingBox()).applyMatrix4(enemy.mesh.matrixWorld);
         if(enemyBox.containsBox(planeBox) || enemyBox.intersectsBox(planeBox)) {
-            acertouaviao = true;
             enemy.deleteAllBullets(scene);
             enemy.setIsDead(scene);
-            console.log(planeClass.vida);
-            if(planeClass.getIsMortal())
-                planeClass.damage(2);
+            // console.log(planeClass.vida);
+            if(planeClass.getIsMortal()){
+                console.log(planeClass.vida);
+                planeClass.damage(1);
+                takeOneHealthBar();
+                planeClass.damage(1);
+                takeOneHealthBar();
+            }
         }
     });
 }
@@ -349,6 +342,22 @@ function colisionBulletEnemy() {
                 planeClass.deleteOneBullet(bullet, scene);
                 enemy.deleteAllBullets(scene);
                 enemy.setIsDead(scene);
+            }
+        });
+    });
+}
+function colisionBulletPlane() {
+    enemyVector.forEach(enemy => {
+        let bullets = enemy.getBullets();
+        let planeBox = box.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
+        bullets.forEach(bullet => {
+            let bulletBox = box2.copy(bullet.getBoundingBox()).applyMatrix4( bullet.mesh.matrixWorld )
+            if(planeBox.containsBox(bulletBox) || planeBox.intersectsBox(bulletBox)) {
+                enemy.deleteOneBullet(bullet, scene);
+                if(planeClass.isMortal){
+                    planeClass.damage(1);
+                    takeOneHealthBar();
+                }
             }
         });
     });
@@ -373,9 +382,11 @@ function colisionCuraPlane() {
         let planeBox = box3.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
         let curaBox = box.copy(cura.getBoundingBox()).applyMatrix4(cura.mesh.matrixWorld);
         if(curaBox.containsBox(planeBox) || curaBox.intersectsBox(planeBox)) {
-            planeClass.recover(1);
-            let id = curaVector.indexOf(cura);
-            cura.setIsCaught();
+            if(planeClass.canTakeLife){
+                gainOneHealthBar();
+                planeClass.recover(1);
+                cura.setIsCaught();
+            }
         }
     });
 }
@@ -478,11 +489,7 @@ function keyboardUpdate() {
         }
     }
     if (keyboard.down("G")) {
-        if (planeClass.getIsMortal()){
-            planeClass.isMortal = false;
-        }
-        else
-            planeClass.isMortal = true;
+        planeClass.isMortal = !planeClass.isMortal;
     }
     if (keyboard.pressed("ctrl") && !cooldownBullet){
         planeClass.createShoot(scene);
@@ -495,30 +502,61 @@ function keyboardUpdate() {
         setTimeout( () => cooldownMissile = false, 1000);
     }
     if (keyboard.pressed("enter")){
-        createEnemy = false;
+        play = false;
         enemyVector.forEach(enemy => {
             enemy.deleteAllBullets(scene);
             enemy.setIsDead(scene);
         });
         groundEnemyVector.forEach(enemy => {
-            enemy.deleteAllBullets(scene);
+            enemy.deleteAllMissiles(scene);
             enemy.setIsDead(scene);
         });
         curaVector.forEach(cura => {
             cura.setIsCaught();
         });
-        planeHolder.position.set(0,16,0);
-        createEnemy = true;
+        planeHolder.position.set(0,0,0);
+        resetHealthBar();
+        play = true;
     }
 }
 //********************************************//
 
 //********************************************//
 window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
-//********************************************//
-render();
-
 document.getElementById("webgl-output").appendChild(stats.domElement);//Pra mostrar o FPS
+render();
+//********************************************//
+
+
+//********************************************//
+//Gerando viewport da vida
+var vidas = [];
+var geometry = new THREE.BoxGeometry(0.75, 1.5, 0.1);
+var material = new THREE.MeshLambertMaterial({color:"rgb(0, 165, 0)"});
+for (let i = 0; i < planeClass.vida; i++) {
+    vidas[i] = new THREE.Mesh(geometry, material)
+    vidas[i].position.set(-i*1.1+5, -200, 20);
+    scene.add(vidas[i]);
+    vidas.push(vidas[i]);
+}
+
+function takeOneHealthBar(){
+    if(planeClass.vida >=0)
+    scene.remove(vidas.at(planeClass.vida));
+}
+
+function gainOneHealthBar(){
+        scene.add(vidas.at(planeClass.vida));
+}
+
+function resetHealthBar(){
+    if(planeClass.vida <= 5){
+        planeClass.vida = 5;
+        for(let i = 0; i < planeClass.vida; i++)
+            scene.add(vidas.at(i));
+    }
+}
+//********************************************//
 function controlledRender()
 {
   var width = window.innerWidth;
@@ -527,18 +565,14 @@ function controlledRender()
   // Set main viewport
   renderer.setViewport(0, 0, width, height); // Reset viewport    
   renderer.setScissorTest(false); // Disable scissor to paint the entire window
-  renderer.setClearColor("rgb(80, 70, 170)");    
-  renderer.clear();   // Clean the window
   renderer.render(scene, camera);   
 
-//   // Set virtual camera viewport 
-//   var offset = 100; 
-//   renderer.setViewport(offset, height-vcHeidth-offset, vcWidth, vcHeidth);  // Set virtual camera viewport  
-//   renderer.setScissor(offset, height-vcHeidth-offset, vcWidth, vcHeidth); // Set scissor with the same size as the viewport
-//   renderer.setScissorTest(true); // Enable scissor to paint only the scissor are (i.e., the small viewport)
-//   renderer.setClearColor(0x000000);  // Use a darker clear color in the small viewport 
-//   renderer.clear(); // Clean the small viewport
-//   renderer.render(scene, virtualCamera);  // Render scene of the virtual camera
+  // Set virtual camera viewport 
+  var offset = -90; 
+  renderer.setViewport(offset, height-vcHeidth-offset, vcWidth, vcHeidth);  // Set virtual camera viewport  
+  renderer.setScissor(offset, height-vcHeidth-offset, vcWidth, vcHeidth); // Set scissor with the same size as the viewport
+  renderer.setScissorTest(true); // Enable scissor to paint only the scissor are (i.e., the small viewport)
+  renderer.render(scene, virtualCamera);  // Render scene of the virtual camera
 }
 
 function render() {
@@ -546,45 +580,47 @@ function render() {
     onWindowResize();
     keyboardUpdate();
 
-    moverPlanos();
+    if(play){
+        moverPlanos();
 
-    planeClass.moveBullets();
-    planeClass.moveMissiles();
-    planeClass.deleteBullets(scene);
-    planeClass.deleteMissiles(scene);
+        planeClass.moveBullets();
+        planeClass.moveMissiles();
+        planeClass.deleteBullets(scene);
+        planeClass.deleteMissiles(scene);
 
-    if(createEnemy){
+        verticalCura();
+
         chamaAdversario();
         movimentarAdversario();
-        verticalCura();
-    }
+        
+        enemyVector.forEach(element => {
+            element.createEnemyShoot(scene);
+            element.moveBullets(planeHolder);
+            if(element.getPositionZ() > 45) {
+                element.deleteAllBullets(scene);
+            }
+        });    
 
+        groundEnemyVector.forEach(element => {
+            element.createMissiles(scene);
+            element.moveMissiles(planeHolder);
+            if(element.getPositionZ() > 45) {
+                element.deleteAllMissiles(scene);
+            }
+        });
+        //if(acertouaviao) removePlane();
 
-    enemyVector.forEach(element => {
-        element.createEnemyShoot(scene);
-        element.moveBullets(planeHolder);
-        if(element.getPositionZ() > 45) {
-            element.deleteAllBullets(scene);
+        colisionBulletEnemy();
+        colisionBulletPlane();
+        colisionPlaneEnemy();
+        colisionMissileEnemy();
+        colisionCuraPlane();
+        animation();
+
+        if(planeClass.vida <= 0){
+            removePlane();
+            play = false;
         }
-    });
-
-    groundEnemyVector.forEach(element => {
-        element.createMissiles(scene);
-        element.moveMissiles(planeHolder);
-        if(element.getPositionZ() > 45) {
-            element.deleteAllMissiles(scene);
-        }
-    });
-
-    colisionBulletEnemy();
-    colisionPlaneEnemy();
-    colisionMissileEnemy();
-    colisionCuraPlane();
-    animation();
-    //if(acertouaviao) removePlane();
-
-    if(planeClass.vida <= 0){
-        removePlane();
     }
 
     requestAnimationFrame(render);

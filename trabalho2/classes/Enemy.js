@@ -71,6 +71,10 @@ export default class Plane {
       return this.boundingBox;
    }
 
+   getBullets() {
+      return this.bullets;
+   }
+
    setIsDead(scene) {
       this.deleteAllBullets(scene);
       this.isDead = true;
@@ -209,4 +213,9 @@ export default class Plane {
    }
 
 
+   deleteOneBullet(bullet, scene) {
+      let id = this.bullets.indexOf(bullet);
+      scene.remove(bullet.mesh);
+      this.bullets.splice(id, 1);
+   }
 }
