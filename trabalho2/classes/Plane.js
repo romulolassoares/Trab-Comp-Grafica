@@ -6,7 +6,7 @@ import { degreesToRadians } from '../../libs/util/util.js';
 
 export default class Plane {
    // Private
-   #geometry = new THREE.ConeGeometry(6, 20, 64);
+   #geometry = new THREE.ConeGeometry(6, 18, 64);
    // #material;
    #material = new THREE.MeshLambertMaterial({color:'rgb(180,180,255)'});
    //loader = new GLTFLoader();
@@ -21,17 +21,14 @@ export default class Plane {
    isMortal;
    canTakeLife;
     
-   constructor(aviao) {
-      // this.mesh = new THREE.Mesh(this.#geometry, this.#material);
-      this.mesh = aviao;
-      // this.mesh.scale.set(5,5,5);
+   constructor() {
+      this.mesh = new THREE.Mesh(this.#geometry, this.#material);
       this.mesh.position.set(0,20,0);
-      // this.mesh.castShadow = true;
       this.mesh.rotateX(degreesToRadians(-90));
-      // this.mesh.geometry.computeBoundingBox();
-      // this.boundingBox
-      //    .copy(this.mesh.geometry.boundingBox)
-      //    .applyMatrix4(this.mesh.matrixWorld);
+      this.mesh.geometry.computeBoundingBox();
+      this.boundingBox
+         .copy(this.mesh.geometry.boundingBox)
+         .applyMatrix4(this.mesh.matrixWorld);
       this.bullets = [];
       this.missiles = [];
       this.target = new THREE.Vector3();
@@ -42,14 +39,9 @@ export default class Plane {
 
    setObj(obj) {
       this.obj = obj;
-      this.obj.position.set(0,20,0);
+      this.obj.position.set(0,16,0);
       this.obj.castShadow = true;
-      this.obj.rotateY(degreesToRadians(-90))
-      this.boundingBox = new THREE.Box3().setFromObject(this.obj);
-      // console.log(this.obj.isObject3D)
-      // this.boundingBox
-      //    .copy(this.obj.geometry.boundingBox)
-      //    .applyMatrix4(this.obj.matrixWorld);
+      this.obj.rotateY(degreesToRadians(-90));
    }
 
    getPositionZ() {
@@ -154,7 +146,8 @@ export default class Plane {
    deletePlane(scene,planeHolder){
       scene.remove(this.mesh);
       scene.remove(this.boundingbox);
-      this.mesh.translateY(-20);
+      this.mesh.translateX(-20);
+      this.obj.translateY(-20);
    }
 
    getVida(){
@@ -163,5 +156,25 @@ export default class Plane {
 
    getIsMortal(){
       return this.isMortal;
+   }
+
+   moveUp(moveDistance) {
+      this.mesh.translateY(moveDistance);
+      this.obj.translateX(-moveDistance);
+   }
+
+   moveDown(moveDistance) {
+      this.mesh.translateY(-moveDistance);
+      this.obj.translateX(moveDistance);
+   }
+
+   moveLeft(moveDistance) {
+      this.mesh.translateX(-moveDistance);
+      this.obj.translateZ(moveDistance);
+   }
+
+   moveRight(moveDistance) {
+      this.mesh.translateX(moveDistance);
+      this.obj.translateZ(-moveDistance);
    }
 }
