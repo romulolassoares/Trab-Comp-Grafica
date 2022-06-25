@@ -155,10 +155,10 @@ var curaVector = [];
 // função para limitar quantos inimigos tem na tela
 function chamaAdversario() {
     var chance = Math.floor(Math.random() * 900) + 1;
-    if (chance <= 0) { // 0.01%
+    if (chance <= 6) { // 0.01%
         criarAdversario();
     }
-    if(chance <= 20){
+    if(chance <= 2){
         criarAdversarioChao();
     }
     if(chance <= 4)

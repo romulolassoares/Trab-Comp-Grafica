@@ -71,7 +71,7 @@ export default class Plane {
          this.missiles.push(missile);
          scene.add(missile.mesh);
          this.missileCooldown = true;
-         setTimeout( () => this.missileCooldown = false, 800);
+         setTimeout( () => this.missileCooldown = false, 1600);
       }
    }
 
