@@ -6,7 +6,7 @@ import {
 } from "../../libs/util/util.js";
 import { default as Bullet } from './Bullet.js';
 
-export default class Plane {
+export default class Enemy {
    // Private
    #geometry = new THREE.BoxGeometry(10, 10, 10);
    #material = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
@@ -26,7 +26,7 @@ export default class Plane {
    timeAlive;
    t=0;
 
-   constructor() {
+   constructor(type) {
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
       this.mesh.geometry.computeBoundingBox();
       // this.mesh.position.set(newpos,10,-200);
@@ -39,8 +39,8 @@ export default class Plane {
       this.target = new THREE.Vector3();
       this.mesh.castShadow = true;
       this.mesh.receiveShadow = true;
-      this.moveType = Math.floor(Math.random() * 4);
-      // this.moveType = 0;
+      // this.moveType = Math.floor(Math.random() * 4);
+      this.moveType = type;
       this.timeAlive = 3;
       this.dir = 1;
    }
@@ -89,7 +89,7 @@ export default class Plane {
          this.bullets.push(bullet);
          scene.add(bullet.mesh);
          this.bulletCooldown = true;
-         setTimeout( () => this.bulletCooldown = false, 2500);
+         setTimeout( () => this.bulletCooldown = false, 3000);
       }
    }
 

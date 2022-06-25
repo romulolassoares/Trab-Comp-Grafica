@@ -171,10 +171,16 @@ export default class Plane {
    moveLeft(moveDistance) {
       this.mesh.translateX(-moveDistance);
       this.obj.translateZ(moveDistance);
+      this.obj.position.y = 16;
+      if(this.obj.rotation.x < degreesToRadians(12))
+         this.obj.rotateX(degreesToRadians(12));
    }
 
    moveRight(moveDistance) {
       this.mesh.translateX(moveDistance);
       this.obj.translateZ(-moveDistance);
+      this.obj.position.y = 16;
+      if(this.obj.rotation.x > degreesToRadians(-12))
+         this.obj.rotateX(degreesToRadians(-12));
    }
 }
