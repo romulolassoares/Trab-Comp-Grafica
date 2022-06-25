@@ -83,4 +83,15 @@ export default class Cura {
             }
         })
     }
+
+    move(curaVector, id, scene) {
+        this.mesh.updateMatrixWorld(true);
+        if (this.getPositionZ() >= 70) {
+            scene.remove(this.mesh);
+            curaVector.splice(id, 1);
+        }
+        if (this.getPositionX() < 70) {
+            this.mesh.translateY(0.5);
+        }
+    }
 }

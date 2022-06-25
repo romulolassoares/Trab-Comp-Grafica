@@ -52,7 +52,6 @@ function setDirectionalLighting(position) {
 //Criando a camera
 var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300);
 camera.position.set(0, 100, 70);
-// camera.position.set(0, 20, 70);
 camera.lookAt(0, 15, 0);
 scene.add(camera);
 
@@ -88,7 +87,10 @@ var keyboard = new KeyboardState();
 //Criando o avião
 var loader = new GLTFLoader();
 var obj;
-var material;
+var tecoTecoObj;
+var tieFifhterObj;
+var alienPurpleObj;
+var toonTankObj;
 const afterLoadPlane = (object) => {
     planeClass.setObj(object);
     scene.add(object);
@@ -96,10 +98,10 @@ const afterLoadPlane = (object) => {
     play = true;
 };
 
-const afterLoadGroundEnemy = (enemy, object) => {
-    enemy.setObj(object);
-    scene.add(object);
-    planeHolder = enemy.obj
+const afterLoadEnemy = (enemy, object) => {
+    let objCopy = new THREE.Object3D().copy(object);
+    enemy.setObj(objCopy);
+    scene.add(objCopy);
     play = true;
 };
 
@@ -114,22 +116,61 @@ loader.load('./assets/Airplane.glb', function (gltf) {
         }
     });
     afterLoadPlane(obj);
-}, onProgress, onError);
+}, onProgress, null);
 
 loader.load('./assets/ToonTank.glb', function (gltf) {
-    obj = gltf.scene;
-    obj.position.set(0,46,0);
-    obj.name = 'airplane';
-    obj.visible = true;
-    obj.traverse(function (child) {
+    toonTankObj = gltf.scene;
+    toonTankObj.position.set(0,46,0);
+    toonTankObj.scale.set(3,3,3);
+    toonTankObj.name = 'airplane';
+    toonTankObj.visible = true;
+    toonTankObj.traverse(function (child) {
         if (child) {
             child.castShadow = true;
         }
     });
     // afterLoadPlane(obj);
-}, onProgress, onError);
+}, onProgress, null);
 
-function onError() { };
+loader.load('./assets/TecoTeco.glb', function (gltf) {
+    tecoTecoObj = gltf.scene;
+    tecoTecoObj.position.set(0,46,0);
+    tecoTecoObj.scale.set(2,2,2);
+    tecoTecoObj.name = 'enemy';
+    tecoTecoObj.visible = true;
+    tecoTecoObj.traverse(function (child) {
+        if (child) {
+            child.castShadow = true;
+        }
+    });
+}, onProgress, null);
+
+loader.load('./assets/tieFighter.glb', function (gltf) {
+    tieFifhterObj = gltf.scene;
+    tieFifhterObj.position.set(0,46,0);
+    tieFifhterObj.scale.set(2,2,2);
+    tieFifhterObj.name = 'enemy';
+    tieFifhterObj.visible = true;
+    tieFifhterObj.traverse(function (child) {
+        if (child) {
+            child.castShadow = true;
+        }
+    });
+}, onProgress, null);
+
+loader.load('./assets/AlienPurple.glb', function (gltf) {
+    alienPurpleObj = gltf.scene;
+    alienPurpleObj.position.set(0,46,0);
+    alienPurpleObj.scale.set(3,3,3);
+    alienPurpleObj.name = 'enemy';
+    alienPurpleObj.visible = true;
+    alienPurpleObj.traverse(function (child) {
+        if (child) {
+            child.castShadow = true;
+        }
+    alienPurpleObj.children.splice(5,1);
+    });
+}, onProgress, null);
 
 function onProgress(xhr, model) {
     if (xhr.lengthComputable) {
@@ -140,7 +181,6 @@ function onProgress(xhr, model) {
 const planeClass = new Plane();
 var planeHolder = new THREE.Object3D();
 scene.add(planeHolder);
-// scene.add(planeClass.mesh);
 //********************************************//
 var target = new THREE.Vector3();
 
@@ -161,8 +201,8 @@ var cooldownType4 = true;
 var cooldownType5 = true;
 setTimeout( () => cooldownType1 = false, 5000);
 setTimeout( () => cooldownType2 = false, 8000);
-setTimeout( () => cooldownType3 = false, 0);
-setTimeout( () => cooldownType4 = false, 20000);
+setTimeout( () => cooldownType3 = false, 10000);
+setTimeout( () => cooldownType4 = false, 30000);
 setTimeout( () => cooldownType5 = false, 6000);
 
 function chamaAdversario() {
@@ -185,7 +225,7 @@ function chamaAdversario() {
     }
     if(!cooldownType4){
         cooldownType4 = true;
-        setTimeout( () => cooldownType4 = false, 0);
+        setTimeout( () => cooldownType4 = false, 30000);
         criarAdversarioChao();
     }
     if(!cooldownType5) {
@@ -194,54 +234,17 @@ function chamaAdversario() {
         criarCura();
     }
 }
-
-function criarCura(){
-    let cura = new Cura();
-    var newpos = Math.floor(Math.random() * 95) + 1;
-    //newpos = 0;
-    const chance = Math.floor(Math.random() * 2) + 1;
-    newpos = chance === 1 ? newpos : -newpos;
-    cura.setPosition(newpos);
-    scene.add(cura.mesh);
-    curaVector.push(cura);
-}
-
-function verticalCura() {
-    curaVector.forEach(cura => {
-        cura.mesh.updateMatrixWorld(true);
-        if (cura.getPositionZ() >= 70) {
-            scene.remove(cura.mesh);
-            let id = curaVector.indexOf(cura);
-            curaVector.splice(id, 1);
-        }
-        if (cura.getPositionX() < 70) {
-            cura.mesh.translateY(0.5);
-        }
-    });
-}
-
-var enemyobject;
-const afterLoadEnemy = (enemy, object) => {
-    let objCopy = new THREE.Object3D().copy(object);
-    enemy.setObj(objCopy);
-    scene.add(objCopy);
-    play = true;
-};
-loader.load('./assets/TecoTeco.glb', function (gltf) {
-    enemyobject = gltf.scene;
-    enemyobject.position.set(0,46,0);
-    enemyobject.name = 'enemy';
-    enemyobject.visible = true;
-    enemyobject.traverse(function (child) {
-        if (child) {
-            child.castShadow = true;
-        }
-    });
-}, onProgress, onError);
-
 function criarAdversario(type) {
     let enemy = new Enemy(type);
-    afterLoadEnemy(enemy, enemyobject);
+    if(enemy.moveType === 0) {
+        afterLoadEnemy(enemy, tecoTecoObj);
+    } else if(enemy.moveType === 1) {
+        afterLoadEnemy(enemy, tecoTecoObj);
+    } else if(enemy.moveType === 2) {
+        afterLoadEnemy(enemy, alienPurpleObj);
+    } else if(enemy.moveType === 3) {
+        afterLoadEnemy(enemy, tieFifhterObj);
+    }
     var newpos = Math.floor(Math.random() * 95) + 1;
     const chance = Math.floor(Math.random() * 2) + 1;
     newpos = chance === 1 ? newpos : -newpos;
@@ -251,9 +254,9 @@ function criarAdversario(type) {
     scene.add(enemy.mesh);
     enemyVector.push(enemy);
 }
-
 function criarAdversarioChao() {
     let enemy = new GroundEnemy();
+    afterLoadEnemy(enemy, toonTankObj);
     var newpos = Math.floor(Math.random() * 95) + 1;
     //newpos = 30;
     const chance = Math.floor(Math.random() * 2) + 1;
@@ -264,43 +267,26 @@ function criarAdversarioChao() {
     scene.add(enemy.mesh);
     groundEnemyVector.push(enemy);
 }
-// a ideia é fazer adversário se movimentarem aleatoriamente 
-// sendo os tipo de movimento: vertical, horizontal, diagonal ...
 function movimentarAdversario() {
     enemyVector.forEach(enemy => {
         let id = enemyVector.indexOf(enemy);
         enemy.move(enemyVector, id, scene);
     });
     groundEnemyVector.forEach(enemy => {
-        verticalChao(enemy);
+        let id = groundEnemyVector.indexOf(enemy);
+        enemy.verticalChaoMove(groundEnemyVector, id ,scene);
     })
 }
-
-function verticalChao(enemy) {
-    enemy.mesh.updateMatrixWorld(true);
-    if (enemy.getPositionZ() >= 70) {
-        scene.remove(enemy.mesh);
-        
-        let id = groundEnemyVector.indexOf(enemy);
-        groundEnemyVector.splice(id,1);
-    }
-    if (enemy.getPositionZ() < 70) {
-        var v = enemy.velocity;
-        enemy.mesh.translateZ(0.2 * v);
-    }
-}
 //********************************************//
 
 //********************************************//
+/**
+ * Funções para valdar as colisões
+ */
 const box = new THREE.Box3();
 const box2 = new THREE.Box3();
 const box3 = new THREE.Box3();
 
-/**
- * Função para validar se ocorreu colisão entre os tiros e os inimigos.
- * Caso ocorra uma colisão o tiro e o inimigo são removidos da tela.
- */
-var del = 0;
 function colisionPlaneEnemy(){
     enemyVector.forEach(enemy => {
         let planeBox = box3.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
@@ -308,7 +294,6 @@ function colisionPlaneEnemy(){
         if(enemyBox.containsBox(planeBox) || enemyBox.intersectsBox(planeBox)) {
             enemy.deleteAllBullets(scene);
             enemy.setIsDead(scene);
-            // console.log(planeClass.vida);
             if(planeClass.getIsMortal()){
                 console.log(planeClass.vida);
                 planeClass.damage(1);
@@ -319,7 +304,6 @@ function colisionPlaneEnemy(){
         }
     });
 }
-// Bug -> não deleta todos os tiros de um inimigo da tela
 function colisionBulletEnemy() {
     let bullets = planeClass.getBullets();
     enemyVector.forEach(enemy => {
@@ -364,6 +348,22 @@ function colisionMissileEnemy() {
         });
     });
 }
+function colisionMissilePlane() {
+    groundEnemyVector.forEach(enemy => {
+        let missiles = enemy.getMissiles();
+        let planeBox = box.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
+        missiles.forEach(missile => {
+            let missileBox = box2.copy(missile.getBoundingBox()).applyMatrix4( missile.mesh.matrixWorld )
+            if(planeBox.containsBox(missileBox) || planeBox.intersectsBox(missileBox)) {
+                enemy.deleteOneMissile(missile, scene);
+                if(planeClass.isMortal){
+                    planeClass.damage(1);
+                    takeOneHealthBar();
+                }
+            }
+        });
+    });
+}
 function colisionCuraPlane() {
     curaVector.forEach(cura => {
         let planeBox = box3.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
@@ -379,19 +379,18 @@ function colisionCuraPlane() {
 }
 
 /**
- * Para efetuar a animação dos inimigos
+ * Para efetuar a animações
  */
-// var enemiesAnimation = [];
 function removePlane(){
     if(planeClass.mesh.scale.x>=0){
         planeClass.mesh.scale.x -=.1;
         planeClass.mesh.scale.y -=.1;
         planeClass.mesh.scale.z -=.1;
     }
-        planeClass.deletePlane(scene, planeHolder);
-        // planeHolder.geometry.dispose();
-        scene.remove(planeHolder);
-        //Parece que a boudingBox ainda ta na cena
+    planeClass.deletePlane(scene, planeHolder);
+    // planeHolder.geometry.dispose();
+    scene.remove(planeHolder);
+    //Parece que a boudingBox ainda ta na cena
 }
 
 function animation() {
@@ -404,10 +403,14 @@ function animation() {
                 enemy.mesh.scale.x -=.1;
                 enemy.mesh.scale.y -=.1;
                 enemy.mesh.scale.z -=.1;
+                enemy.obj.scale.x -=.1;
+                enemy.obj.scale.y -=.1;
+                enemy.obj.scale.z -=.1;
             }
             if(enemy.mesh.scale.x <= 0) {
                 let idEnemy = enemyVector.indexOf(enemy);
                 scene.remove(enemy.mesh);
+                scene.remove(enemy.obj);
                 enemyVector.splice(idEnemy, 1);
             }
         }
@@ -438,48 +441,33 @@ function animation() {
         }
     });
 }
-
 //********************************************//
 
 //********************************************//
 let cooldownBullet = false;
 let cooldownMissile = false;
-//Função para usar as teclas
 function keyboardUpdate() {
     keyboard.update();
     var speed = 40;
     var moveDistance = speed * clock.getDelta();
-    // Keyboard.pressed - execute while is pressed
     planeClass.mesh.getWorldPosition(target);
     if (keyboard.pressed("down")) {
         if (target.z <= 45) {
-            // planeHolder.translateZ(moveDistance);
-            // planeHolder.translateX(moveDistance);
             planeClass.moveDown(moveDistance);
-            // planeClass.obj.translateX(moveDistance);
         }
     }
     if (keyboard.pressed("up")) {
         if (target.z >= -150) {
-            // planeHolder.translateZ(-moveDistance);
-            // planeHolder.translateX(-moveDistance);
-            // planeClass.obj.translateX(-moveDistance)
             planeClass.moveUp(moveDistance);
         }
     }
     if (keyboard.pressed("right")) {
         if (target.x <= 95) {
-            // planeHolder.translateX(moveDistance);
-            // planeHolder.translateZ(-moveDistance);
-            // planeClass.obj.translateZ(-moveDistance)
             planeClass.moveRight(moveDistance);
         }
     }
     if (keyboard.pressed("left")) {
         if (target.x >= -95) {
-            // planeHolder.translateX(-moveDistance);
-            // planeHolder.translateZ(moveDistance);
-            // planeClass.obj.translateZ(moveDistance)
             planeClass.moveLeft(moveDistance);
         }
     }
@@ -542,13 +530,31 @@ for (let i = 0; i < planeClass.vida; i++) {
     vidas.push(vidas[i]);
 }
 
+function criarCura(){
+    let cura = new Cura();
+    var newpos = Math.floor(Math.random() * 95) + 1;
+    //newpos = 0;
+    const chance = Math.floor(Math.random() * 2) + 1;
+    newpos = chance === 1 ? newpos : -newpos;
+    cura.setPosition(newpos);
+    scene.add(cura.mesh);
+    curaVector.push(cura);
+}
+
+function verticalCura() {
+    curaVector.forEach(cura => {
+        let id = curaVector.indexOf(cura);
+        cura.move(curaVector, id, scene);
+    });
+}
+
 function takeOneHealthBar(){
     if(planeClass.vida >=0)
         scene.remove(vidas.at(planeClass.vida));
 }
 
 function gainOneHealthBar(){
-        scene.add(vidas.at(planeClass.vida));
+    scene.add(vidas.at(planeClass.vida));
 }
 
 function resetHealthBar(){
@@ -610,13 +616,13 @@ function render() {
                 element.deleteAllMissiles(scene);
             }
         });
-        //if(acertouaviao) removePlane();
 
         colisionBulletEnemy();
         colisionBulletPlane();
         colisionPlaneEnemy();
         colisionMissileEnemy();
         colisionCuraPlane();
+        colisionMissilePlane();
         animation();
 
         if(planeClass.vida <= 0){
@@ -625,13 +631,10 @@ function render() {
         }
     }
 
-    // console.log(clock.getElapsedTime() + "s")
     if(clock.getElapsedTime() >= 120) {
         console.log("Acabou o jogo");
-        // passTime = true;
+        passTime = true;
     }
-    // console.log("Passou " + clock.getDelta() + " tempo")
-
     requestAnimationFrame(render);
     controlledRender();
 }
