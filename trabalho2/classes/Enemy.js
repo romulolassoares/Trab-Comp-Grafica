@@ -40,11 +40,7 @@ export default class Enemy {
       this.mesh.castShadow = true;
       this.mesh.receiveShadow = true;
       // this.moveType = Math.floor(Math.random() * 4);
-<<<<<<< HEAD
       this.moveType = type;
-=======
-      this.moveType = 0;
->>>>>>> 9fad7ea4dc818bc4e3a442e9f3600dd66dc2eef4
       this.timeAlive = 3;
       this.dir = 1;
    }

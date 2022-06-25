@@ -489,11 +489,7 @@ function keyboardUpdate() {
     if (keyboard.pressed("ctrl") && !cooldownBullet){
         planeClass.createShoot(scene);
         cooldownBullet = true;
-<<<<<<< HEAD
         setTimeout( () => cooldownBullet = false, 1000);
-=======
-        setTimeout( () => cooldownBullet = false, 2000);
->>>>>>> 9fad7ea4dc818bc4e3a442e9f3600dd66dc2eef4
     }
     if (keyboard.pressed("space") && !cooldownMissile){
         planeClass.createMissiles(scene);
