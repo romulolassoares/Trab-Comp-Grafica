@@ -1,8 +1,6 @@
 import * as THREE from 'three';
 import {
-   onWindowResize,
    degreesToRadians,
-   createGroundPlane
 } from "../../libs/util/util.js";
 import { default as Bullet } from './Bullet.js';
 
@@ -15,6 +13,7 @@ export default class Enemy {
    mesh;
    boundingBox = new THREE.Box3();
    velocity;
+   obj;
    isDead;
    isShooting;
    bullets;
@@ -29,7 +28,8 @@ export default class Enemy {
    constructor(type) {
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
       this.mesh.geometry.computeBoundingBox();
-      // this.mesh.position.set(newpos,10,-200);
+      this.mesh.material.transparent = true;
+      this.mesh.material.opacity = 0;
       this.boundingBox.copy(this.mesh.geometry.boundingBox).applyMatrix4(this.mesh.matrixWorld);
       this.isDead = false;
       this.isShooting = true;
@@ -40,18 +40,30 @@ export default class Enemy {
       this.mesh.castShadow = true;
       this.mesh.receiveShadow = true;
       // this.moveType = Math.floor(Math.random() * 4);
+<<<<<<< HEAD
       this.moveType = type;
+=======
+      this.moveType = 0;
+>>>>>>> 9fad7ea4dc818bc4e3a442e9f3600dd66dc2eef4
       this.timeAlive = 3;
       this.dir = 1;
+   }
+
+   setObj(obj) {
+      this.obj = obj;
+      this.obj.castShadow = true;
+      // this.obj.rotateY(degreesToRadians(-90));
    }
 
    setPosition(newpos) {
       if(this.moveType == 3) {
          this.#startPosition = new THREE.Vector3(-41.18956708386401,16,-200);
          this.mesh.position.set(-41.18956708386401,16,-200);
+         this.obj.position.set(-41.18956708386401,16,-200);
       } else {
          this.#startPosition = new THREE.Vector3(newpos,16,-200);
          this.mesh.position.set(newpos,16,-200);
+         this.obj.position.set(newpos,16,-200);
       }
    }
 
@@ -84,7 +96,7 @@ export default class Enemy {
    createEnemyShoot(scene) {
       if(!this.bulletCooldown && this.canShoot) {
          let bullet = new Bullet();
-         this.mesh.getWorldPosition(this.target);
+         this.obj.getWorldPosition(this.target);
          bullet.setPosition(this.target);
          this.bullets.push(bullet);
          scene.add(bullet.mesh);
@@ -131,18 +143,22 @@ export default class Enemy {
    }
 
    verticalMove(enemyVector, id, scene) {
+      this.obj.updateMatrixWorld(true);
       this.mesh.updateMatrixWorld(true);
       if (this.getPositionZ() >= 70) {
+         scene.remove(this.obj);
          scene.remove(this.mesh);
          this.deleteAllBullets(scene);
          enemyVector.splice(id, 1);
       } else {
          this.mesh.translateZ(0.2 * this.velocity);
+         this.obj.translateZ(0.2 * this.velocity);
       }
    }
 
    diagonalMove(enemyVector, id, scene) {
       this.mesh.updateMatrixWorld(true);
+      this.obj.updateMatrixWorld(true);
       if (this.getPositionZ() >= 70) {
          scene.remove(this.mesh);
          this.deleteAllBullets(scene);
@@ -156,6 +172,8 @@ export default class Enemy {
             var x = this.dir;
             this.mesh.translateZ(0.2 * v);
             this.mesh.translateX(0.2 * v * x);
+            this.obj.translateZ(0.2 * v);
+            this.obj.translateX(0.2 * v * x);
          }
       }
    }

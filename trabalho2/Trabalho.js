@@ -220,23 +220,22 @@ function verticalCura() {
     });
 }
 
-function choseMoveType() {
-    var type;
-    var time = Math.floor(clock.getElapsedTime());
-    if(time%10 == 0) {
-        type = 0;
-    } else if (time%15 == 0) {
-        type = 1;
-    } else if (time%30 == 0) {
-        type = 2;
-    } else if (time%25 == 0) {
-        type = 3;
-    }
-    return type;
-}
 
 function criarAdversario(type) {
     let enemy = new Enemy(type);
+    loader.load('./assets/Spacecraft.glb', function (gltf) {
+        obj = gltf.scene;
+        obj.position.set(0,46,0);
+        obj.name = 'enemy';
+        obj.visible = true;
+        obj.traverse(function (child) {
+            if (child) {
+                child.castShadow = true;
+            }
+        });
+        scene.add(obj);
+        afterload(gltf.scene);
+    }, onProgress, onError);
     var newpos = Math.floor(Math.random() * 95) + 1;
     const chance = Math.floor(Math.random() * 2) + 1;
     newpos = chance === 1 ? newpos : -newpos;
@@ -490,7 +489,11 @@ function keyboardUpdate() {
     if (keyboard.pressed("ctrl") && !cooldownBullet){
         planeClass.createShoot(scene);
         cooldownBullet = true;
+<<<<<<< HEAD
         setTimeout( () => cooldownBullet = false, 1000);
+=======
+        setTimeout( () => cooldownBullet = false, 2000);
+>>>>>>> 9fad7ea4dc818bc4e3a442e9f3600dd66dc2eef4
     }
     if (keyboard.pressed("space") && !cooldownMissile){
         planeClass.createMissiles(scene);
@@ -539,7 +542,7 @@ for (let i = 0; i < planeClass.vida; i++) {
 
 function takeOneHealthBar(){
     if(planeClass.vida >=0)
-    scene.remove(vidas.at(planeClass.vida));
+        scene.remove(vidas.at(planeClass.vida));
 }
 
 function gainOneHealthBar(){
