@@ -37,8 +37,8 @@ export default class Enemy {
       this.bulletCooldown = false;
       this.canShoot = true;
       this.target = new THREE.Vector3();
-      this.mesh.castShadow = true;
-      this.mesh.receiveShadow = true;
+      // this.mesh.castShadow = true;
+      // this.mesh.receiveShadow = true;
       // this.moveType = Math.floor(Math.random() * 4);
       this.moveType = type;
       this.timeAlive = 3;
@@ -207,6 +207,7 @@ export default class Enemy {
       this.mesh.updateMatrixWorld(true);
       if(this.getPositionZ() <= -200 && this.getPositionX() > 39) {
          scene.remove(this.mesh);
+         scene.remove(this.obj);
          this.deleteAllBullets(scene);
          enemyVector.splice(id, 1);
       } else {
@@ -221,6 +222,7 @@ export default class Enemy {
             var pos = path.getPoint(this.t);
             if(pos != null) {
                this.mesh.position.set(-pos.x, this.mesh.position.y, -pos.y);
+               this.obj.position.set(-pos.x, this.mesh.position.y, -pos.y);
             }
          }
       }

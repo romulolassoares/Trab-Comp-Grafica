@@ -161,7 +161,7 @@ var cooldownType4 = true;
 var cooldownType5 = true;
 setTimeout( () => cooldownType1 = false, 5000);
 setTimeout( () => cooldownType2 = false, 8000);
-setTimeout( () => cooldownType3 = false, 12000);
+setTimeout( () => cooldownType3 = false, 0);
 setTimeout( () => cooldownType4 = false, 20000);
 setTimeout( () => cooldownType5 = false, 6000);
 
@@ -185,7 +185,7 @@ function chamaAdversario() {
     }
     if(!cooldownType4){
         cooldownType4 = true;
-        setTimeout( () => cooldownType4 = false, 30000);
+        setTimeout( () => cooldownType4 = false, 0);
         criarAdversarioChao();
     }
     if(!cooldownType5) {
@@ -222,8 +222,9 @@ function verticalCura() {
 
 var enemyobject;
 const afterLoadEnemy = (enemy, object) => {
-    enemy.setObj(object);
-    scene.add(object);
+    let objCopy = new THREE.Object3D().copy(object);
+    enemy.setObj(objCopy);
+    scene.add(objCopy);
     play = true;
 };
 loader.load('./assets/TecoTeco.glb', function (gltf) {
