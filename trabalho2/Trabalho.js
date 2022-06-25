@@ -86,23 +86,15 @@ function moverPlanos() {
 var keyboard = new KeyboardState();
 //********************************************//
 //Criando o avião
-var loader = new GLTFLoader();
-var object;
-var geometry = new THREE.BufferGeometry();
-var material;// = new MeshPhongMaterial();
-var mesh;
-loader.load('./assets/Airplane.glb', function (gltf) {
-    gltf.scene.traverse(function (child) {
-            geometry = child.geometry;
-            material = child.material;
-      });
+let mesh;
+var model = new THREE.Object3D();
+var planeClass;
+const loader = new GLTFLoader();
+loader.load( './assets/Airplane.glb', function ( gltf ) {
+    mesh = gltf.mesh;
 });
-// (object.children[0] as THREE.Mesh).material = material
-        // object.traverse(function (child) {
-        //     if ((child as THREE.Mesh).isMesh) {
-        //         (child as THREE.Mesh).material = material
-        //     }
-const planeClass = new Plane();
+
+planeClass = new Plane(mesh);
 var planeHolder = new THREE.Object3D();
 planeHolder.add(planeClass.mesh);
 scene.add(planeHolder);
@@ -119,13 +111,13 @@ var curaVector = [];
 // função para limitar quantos inimigos tem na tela
 function chamaAdversario() {
     var chance = Math.floor(Math.random() * 900) + 1;
-    if (chance <= 10) { // 0.01%
+    if (chance <= 0) { // 0.01%
         criarAdversario();
     }
-    if(chance <= 5){
+    if(chance <= 0){
         criarAdversarioChao();
     }
-    if(chance <= 10)
+    if(chance <= 0)
         criarCura();
 }
 
@@ -418,12 +410,12 @@ function keyboardUpdate() {
     if (keyboard.pressed("ctrl") && !cooldownBullet){
         planeClass.createShoot(scene);
         cooldownBullet = true;
-        setTimeout( () => cooldownBullet = false, 500);
+        setTimeout( () => cooldownBullet = false, 2000);
     }
     if (keyboard.pressed("space") && !cooldownMissile){
         planeClass.createMissiles(scene);
         cooldownMissile = true;
-        setTimeout( () => cooldownMissile = false, 1000);
+        setTimeout( () => cooldownMissile = false, 2000);
     }
     if (keyboard.pressed("enter")){
         play = false;
@@ -466,7 +458,7 @@ for (let i = 0; i < planeClass.vida; i++) {
 
 function takeOneHealthBar(){
     if(planeClass.vida >=0)
-    scene.remove(vidas.at(planeClass.vida));
+        scene.remove(vidas.at(planeClass.vida));
 }
 
 function gainOneHealthBar(){

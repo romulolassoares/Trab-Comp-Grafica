@@ -19,17 +19,17 @@ export default class Plane {
    isMortal;
    canTakeLife;
     
-   constructor() {
-      this.mesh = new THREE.Mesh(this.#geometry, this.#material);
-      // this.mesh = aviao;
+   constructor(aviao) {
+      // this.mesh = new THREE.Mesh(this.#geometry, this.#material);
+      this.mesh = aviao;
       // this.mesh.scale.set(5,5,5);
       this.mesh.position.set(0,20,0);
       this.mesh.castShadow = true;
       this.mesh.rotateX(degreesToRadians(-90));
-      this.mesh.geometry.computeBoundingBox();
-      this.boundingBox
-         .copy(this.mesh.geometry.boundingBox)
-         .applyMatrix4(this.mesh.matrixWorld);
+      // this.mesh.geometry.computeBoundingBox();
+      // this.boundingBox
+      //    .copy(this.mesh.geometry.boundingBox)
+      //    .applyMatrix4(this.mesh.matrixWorld);
       this.bullets = [];
       this.missiles = [];
       this.target = new THREE.Vector3();
