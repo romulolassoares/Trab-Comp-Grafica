@@ -51,8 +51,8 @@ function setDirectionalLighting(position) {
 //********************************************//
 //Criando a camera
 var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300);
-camera.position.set(0, 100, 70);
-// camera.position.set(0, 20, 70);
+// camera.position.set(0, 100, 70);
+camera.position.set(0, 20, 70);
 camera.lookAt(0, 15, 0);
 scene.add(camera);
 
@@ -89,7 +89,7 @@ var keyboard = new KeyboardState();
 var loader = new GLTFLoader();
 var obj;
 var material;
-const afterload = (object) => {
+const afterLoadPlane = (object) => {
     planeClass.setObj(object);
     scene.add(object);
     planeHolder = planeClass.obj
@@ -106,8 +106,7 @@ loader.load('./assets/Airplane.glb', function (gltf) {
             child.castShadow = true;
         }
     });
-    // scene.add(obj);
-    afterload(gltf.scene);
+    afterLoadPlane(obj);
 }, onProgress, onError);
 
 function onError() { };
@@ -118,12 +117,10 @@ function onProgress(xhr, model) {
     }
 }
 
-
 const planeClass = new Plane();
 var planeHolder = new THREE.Object3D();
-// planeHolder.position.set(planeClass.mesh.position);
-// planeHolder.add(planeClass.mesh);
 scene.add(planeHolder);
+// scene.add(planeClass.mesh);
 //********************************************//
 var target = new THREE.Vector3();
 
@@ -390,29 +387,33 @@ function keyboardUpdate() {
     if (keyboard.pressed("down")) {
         if (target.z <= 45) {
             // planeHolder.translateZ(moveDistance);
-            planeHolder.translateX(moveDistance);
+            // planeHolder.translateX(moveDistance);
+            planeClass.moveDown(moveDistance);
             // planeClass.obj.translateX(moveDistance);
         }
     }
     if (keyboard.pressed("up")) {
         if (target.z >= -150) {
             // planeHolder.translateZ(-moveDistance);
-            planeHolder.translateX(-moveDistance);
+            // planeHolder.translateX(-moveDistance);
             // planeClass.obj.translateX(-moveDistance)
+            planeClass.moveUp(moveDistance);
         }
     }
     if (keyboard.pressed("right")) {
         if (target.x <= 95) {
             // planeHolder.translateX(moveDistance);
-            planeHolder.translateZ(-moveDistance);
+            // planeHolder.translateZ(-moveDistance);
             // planeClass.obj.translateZ(-moveDistance)
+            planeClass.moveRight(moveDistance);
         }
     }
     if (keyboard.pressed("left")) {
         if (target.x >= -95) {
             // planeHolder.translateX(-moveDistance);
-            planeHolder.translateZ(moveDistance);
+            // planeHolder.translateZ(moveDistance);
             // planeClass.obj.translateZ(moveDistance)
+            planeClass.moveLeft(moveDistance);
         }
     }
     if (keyboard.down("G")) {
