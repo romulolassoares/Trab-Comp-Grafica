@@ -515,6 +515,7 @@ function keyboardUpdate() {
             cura.setIsCaught();
         });
         planeHolder.position.set(0,0,0);
+        planeClass.mesh.position.set(0,16,0);
         resetHealthBar();
         play = true;
     }
