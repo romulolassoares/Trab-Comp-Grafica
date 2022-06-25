@@ -166,6 +166,7 @@ setTimeout( () => cooldownType4 = false, 20000);
 setTimeout( () => cooldownType5 = false, 6000);
 
 function chamaAdversario() {
+<<<<<<< HEAD
     if(!cooldownType0) {
         cooldownType0 = true;
         setTimeout( () => cooldownType0 = false, 10000);
@@ -182,6 +183,11 @@ function chamaAdversario() {
         cooldownType3 = true;
         setTimeout( () => cooldownType3 = false, 45000);
         criarAdversario(3);
+=======
+    var chance = Math.floor(Math.random() * 900) + 1;
+    if (chance <= 10) { // 0.01%
+        criarAdversario();
+>>>>>>> 513eda5a65b27730944603269cf2b7fd6b657d19
     }
     if(!cooldownType4){
         cooldownType4 = true;
@@ -220,22 +226,27 @@ function verticalCura() {
     });
 }
 
+var enemyobject;
+const afterLoadEnemy = (enemy, object) => {
+    enemy.setObj(object);
+    scene.add(object);
+    play = true;
+};
+loader.load('./assets/TecoTeco.glb', function (gltf) {
+    enemyobject = gltf.scene;
+    enemyobject.position.set(0,46,0);
+    enemyobject.name = 'enemy';
+    enemyobject.visible = true;
+    enemyobject.traverse(function (child) {
+        if (child) {
+            child.castShadow = true;
+        }
+    });
+}, onProgress, onError);
 
 function criarAdversario(type) {
     let enemy = new Enemy(type);
-    loader.load('./assets/Spacecraft.glb', function (gltf) {
-        obj = gltf.scene;
-        obj.position.set(0,46,0);
-        obj.name = 'enemy';
-        obj.visible = true;
-        obj.traverse(function (child) {
-            if (child) {
-                child.castShadow = true;
-            }
-        });
-        scene.add(obj);
-        afterload(gltf.scene);
-    }, onProgress, onError);
+    afterLoadEnemy(enemy, enemyobject);
     var newpos = Math.floor(Math.random() * 95) + 1;
     const chance = Math.floor(Math.random() * 2) + 1;
     newpos = chance === 1 ? newpos : -newpos;
