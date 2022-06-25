@@ -1,9 +1,15 @@
 import * as THREE from 'three';
+import {
+   onWindowResize,
+   degreesToRadians,
+   createGroundPlane
+} from "../../libs/util/util.js";
+
 
 export default class Missile {
    // Private
-   #geometry = new THREE.CylinderGeometry(1, .5, 5, 32);
-   #material = new THREE.MeshLambertMaterial({color:"rgb(255,165,0)"});
+   #geometry = new THREE.CylinderGeometry(.5, 1, 5, 32);
+   #material = new THREE.MeshLambertMaterial({color:"rgb(0,50,100)"});
    // Public
    mesh;
    position;
@@ -30,12 +36,19 @@ export default class Missile {
    getPositionY() {
       return this.mesh.position.y;
    }
+
+   getPositionX() {
+      return this.mesh.position.x;
+   }
+
    getBoundingBox() {
       return this.boundingBox;
    }
 
    findPlane(plane) {
+      // let angle = Math.atan2( plane.position.x - this.getPositionX(), plane.position.z - this.getPositionZ() ) * ( 180 / Math.PI );
       if(!this.find) {
+         // this.mesh.rotateZ(degreesToRadians(Math.abs(angle)));
          this.mesh.lookAt(plane.position.x, 16, plane.position.z);
          this.find = true;
       }
