@@ -137,6 +137,7 @@ var target = new THREE.Vector3();
 //********************************************//
 // Criando Adversários
 var play = true;
+var passTime = false;
 var enemyVector = [];
 var groundEnemyVector = [];
 var curaVector = [];
@@ -208,15 +209,6 @@ function criarAdversarioChao() {
 // sendo os tipo de movimento: vertical, horizontal, diagonal ...
 function movimentarAdversario() {
     enemyVector.forEach(enemy => {
-        // if(enemy.moveType === 0) {
-        //     vertical(enemy);
-        // } else if(enemy.moveType === 1) {
-        //     diagonal(enemy);
-        // } else if(enemy.moveType === 2) {
-        //     verticalAndStop(enemy);
-        // } else if(enemy.moveType === 3) {
-        //     moveRotate(enemy);
-        // }
         let id = enemyVector.indexOf(enemy);
         enemy.move(enemyVector, id, scene);
     });
@@ -224,35 +216,6 @@ function movimentarAdversario() {
         verticalChao(enemy);
     })
 }
-
-// Função para mover os inimigos na vertical
-function vertical(enemy) {
-    // enemy.mesh.updateMatrixWorld(true);
-    // if (enemy.getPositionZ() >= 70) {
-    //     scene.remove(enemy.mesh);
-    //     enemy.deleteAllBullets(scene);
-    //     let id = enemyVector.indexOf(enemy);
-    //     enemyVector.splice(id, 1);
-    // }
-    // if (enemy.getPositionZ() < 70) {
-    //     enemy.verticalMove();
-    // }
-    let id = enemyVector.indexOf(enemy);
-    enemy.verticalMove(enemyVector, id, scene);
-    console.log(enemyVector.length);
-}
-
-// function verticalAndStop(enemy) {
-//     // enemy.mesh.updateMatrixWorld(true);
-//     // if (enemy.getPositionZ() >= 70 || enemy.getPositionX() > 120 || enemy.getPositionX() < -120) {
-//     //     scene.remove(enemy.mesh);
-//     //     enemy.deleteAllBullets(scene);
-//     //     let id = enemyVector.indexOf(enemy);
-//     //     enemyVector.splice(id, 1);
-//     // } else {
-//     //     enemy.verticalAndStopMove();
-//     // }
-// }
 
 function verticalChao(enemy) {
     enemy.mesh.updateMatrixWorld(true);
@@ -267,39 +230,6 @@ function verticalChao(enemy) {
         enemy.mesh.translateZ(0.2 * v);
     }
 }
-
-// function diagonal(enemy) {
-//     enemy.mesh.updateMatrixWorld(true);
-//     if (enemy.getPositionZ() >= 70) {
-//         scene.remove(enemy.mesh);
-//         enemy.deleteAllBullets(scene);
-//         let id = enemyVector.indexOf(enemy);
-//         enemyVector.splice(id, 1);
-//     } else {
-//         enemy.diagonalMove();
-//     }
-// }
-
-
-// // const path = new THREE.Path();
-// // path.absarc(0, 90, degreesToRadians(2360), degreesToRadians(0), degreesToRadians(180), true)
-// // const points = path.getPoints();
-// // const geometry = new THREE.BufferGeometry().setFromPoints( points );
-// // const material = new THREE.LineBasicMaterial( { color: 0xffffff } );
-// // const line = new THREE.Line( geometry, material );
-// // scene.add( line );
-// function moveRotate(enemy) {
-//     enemy.mesh.updateMatrixWorld(true);
-//     if (enemy.getPositionZ() <= -200 && enemy.getPositionX() > 39) {
-//         scene.remove(enemy.mesh);
-//         enemy.deleteAllBullets(scene);
-//         let id = enemyVector.indexOf(enemy);
-//         enemyVector.splice(id, 1);
-//     }
-//     if (enemy.getPositionZ() < 70) {
-//         enemy.rotateMove(path);
-//     }
-// }
 //********************************************//
 
 //********************************************//
@@ -494,12 +424,12 @@ function keyboardUpdate() {
     if (keyboard.pressed("ctrl") && !cooldownBullet){
         planeClass.createShoot(scene);
         cooldownBullet = true;
-        setTimeout( () => cooldownBullet = false, 800);
+        setTimeout( () => cooldownBullet = false, 500);
     }
     if (keyboard.pressed("space") && !cooldownMissile){
         planeClass.createMissiles(scene);
         cooldownMissile = true;
-        setTimeout( () => cooldownMissile = false, 1000);
+        setTimeout( () => cooldownMissile = false, 1200);
     }
     if (keyboard.pressed("enter")){
         play = false;
@@ -579,9 +509,9 @@ function controlledRender()
 function render() {
     stats.update();
     onWindowResize();
-    keyboardUpdate();
-
-    if(play){
+    
+    if(play && !passTime){
+        keyboardUpdate();
         moverPlanos();
 
         planeClass.moveBullets();
@@ -623,6 +553,13 @@ function render() {
             play = false;
         }
     }
+
+    // console.log(clock.getElapsedTime() + "s")
+    if(clock.getElapsedTime() >= 120) {
+        console.log("Acabou o jogo");
+        passTime = true;
+    }
+    // console.log("Passou " + clock.getDelta() + " tempo")
 
     requestAnimationFrame(render);
     controlledRender();
