@@ -17,13 +17,13 @@ export default class Plane {
    target;
    vida;
    isMortal;
+   canTakeLife;
     
-   
    constructor() {
       this.mesh = new THREE.Mesh(this.#geometry, this.#material);
       // this.mesh = aviao;
       // this.mesh.scale.set(5,5,5);
-      this.mesh.position.set(0,16,0);
+      this.mesh.position.set(0,20,0);
       this.mesh.castShadow = true;
       this.mesh.rotateX(degreesToRadians(-90));
       this.mesh.geometry.computeBoundingBox();
@@ -33,8 +33,9 @@ export default class Plane {
       this.bullets = [];
       this.missiles = [];
       this.target = new THREE.Vector3();
-      this.vida = 10;
+      this.vida = 5;
       this.isMortal = true;
+      this.canTakeLife = true;
    }
 
    getBoundingBox() {
@@ -116,11 +117,16 @@ export default class Plane {
 
    damage(dano){
       this.vida -= dano;
+      this.isMortal = false;
+      setTimeout( () => this.isMortal = true, 1000);
    }
    
    recover(life){
-      if(this.vida < 10)
+      if(this.vida < 5){
          this.vida += life;
+         this.canTakeLife = false;
+         setTimeout( () => this.canTakeLife = true, 1000);
+      }
    }
 
    deletePlane(scene,planeHolder){
@@ -135,5 +141,4 @@ export default class Plane {
    getIsMortal(){
       return this.isMortal;
    }
-   
 }

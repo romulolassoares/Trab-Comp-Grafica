@@ -19,7 +19,7 @@ export default class Cura {
     mesh;
     isCaught;
 
-    constructor(aviao) {
+    constructor() {
         this.cubeMesh.position.set(0.8, 0, 2);
         this.cubeMesh2.position.set(0.8, 0, 2);
         this.cubeMesh2.rotateY(degreesToRadians(90));
@@ -57,7 +57,7 @@ export default class Cura {
     }
 
     setPosition(newpos) {
-        this.mesh.position.set(newpos,20,-200);
+        this.mesh.position.set(newpos,23,-200);
     }
 
     getPositionZ() {

@@ -32,7 +32,7 @@ export default class Plane {
    }
 
    setPosition(newpos) {
-      this.mesh.position.set(newpos,20,-50);
+      this.mesh.position.set(newpos,20,-200);
    }
 
    setVelocity(vel) {
@@ -49,6 +49,10 @@ export default class Plane {
 
    getBoundingBox() {
       return this.boundingBox;
+   }
+
+   getBullets() {
+      return this.bullets;
    }
 
    setIsDead(scene) {
@@ -86,5 +90,10 @@ export default class Plane {
          let id = array.indexOf(element);
          array.splice(id, 1);
       })
+   }
+   deleteOneBullet(bullet, scene) {
+      let id = this.bullets.indexOf(bullet);
+      scene.remove(bullet.mesh);
+      this.bullets.splice(id, 1);
    }
 }

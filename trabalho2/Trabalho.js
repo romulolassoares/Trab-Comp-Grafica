@@ -5,7 +5,7 @@ import KeyboardState from '../libs/util/KeyboardState.js'
 import {
     onWindowResize,
     degreesToRadians,
-    createGroundPlane
+    createGroundPlaneWired
 } from "../libs/util/util.js";
 
 import { default as Plane } from './classes/Plane.js';
@@ -25,8 +25,6 @@ renderer.autoClear = false;
 var clock = new THREE.Clock();
 clock.start();
 var stats = new Stats(); //Pra ver os status do FPS
-// initDefaultBasicLight(scene);
-// var renderer = initRenderer();
 //********************************************//
 // Criando a luz
 var position = new THREE.Vector3(0, 100, 100);
@@ -54,28 +52,22 @@ function setDirectionalLighting(position) {
 //Criando a camera
 var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300);
 camera.position.set(0, 100, 70);
-// camera.position.set(0, 0, 70);
+// camera.position.set(0, 20, 70);
 camera.lookAt(0, 15, 0);
 scene.add(camera);
 
-var lookAtVec   = new THREE.Vector3( 0.0, 0, -15.0 );
-var lookUp   = new THREE.Vector3( 0.0, 1, 0 );
-var camPosition = new THREE.Vector3( 0, -15, 0 );
+var camPosition = new THREE.Vector3( 0, -200, 30 );
 var vcWidth = 400; 
 var vcHeidth = 300; 
-var virtualCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300);
+var virtualCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300); 
   virtualCamera.position.copy(camPosition);
-  virtualCamera.up.copy(lookUp);
-  virtualCamera.lookAt(lookAtVec);
+  scene.add(virtualCamera);
 //********************************************//
 //Criando os planos
 var planos = [];
 
 for (let i = 0; i < 3; i++) {
-    planos[i] = createGroundPlane(800.0, 200.0, 60, 60, "rgb(160,160,160)");
-    //planos[i] = createGroundPlane(800, 200);
-    //Usar o rotate para se for plano sem ser wired
-    planos[i].rotateX(degreesToRadians(-90));
+    planos[i] = createGroundPlaneWired(800.0, 200.0);
     planos[i].position.set(0, 0, i * -100);
     planos[i].receiveShadow = true;
     scene.add(planos[i]);
@@ -89,9 +81,6 @@ function moverPlanos() {
         }
     });
 }
-
-
-
 //********************************************//
 //Para usar o Keyboard
 var keyboard = new KeyboardState();
@@ -136,7 +125,7 @@ function chamaAdversario() {
     if(chance <= 5){
         criarAdversarioChao();
     }
-    if(chance <= 1)
+    if(chance <= 10)
         criarCura();
 }
 
@@ -256,6 +245,7 @@ const box3 = new THREE.Box3();
  * Função para validar se ocorreu colisão entre os tiros e os inimigos.
  * Caso ocorra uma colisão o tiro e o inimigo são removidos da tela.
  */
+var del = 0;
 function colisionPlaneEnemy(){
     enemyVector.forEach(enemy => {
         let planeBox = box3.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
@@ -263,10 +253,14 @@ function colisionPlaneEnemy(){
         if(enemyBox.containsBox(planeBox) || enemyBox.intersectsBox(planeBox)) {
             enemy.deleteAllBullets(scene);
             enemy.setIsDead(scene);
-            console.log(planeClass.vida);
-            if(planeClass.getIsMortal())
-                planeClass.damage(0.2);
-            console.log("Morreu aqui");
+            // console.log(planeClass.vida);
+            if(planeClass.getIsMortal()){
+                console.log(planeClass.vida);
+                planeClass.damage(1);
+                takeOneHealthBar();
+                planeClass.damage(1);
+                takeOneHealthBar();
+            }
         }
     });
 }
@@ -282,6 +276,22 @@ function colisionBulletEnemy() {
                 planeClass.deleteOneBullet(bullet, scene);
                 enemy.deleteAllBullets(scene);
                 enemy.setIsDead(scene);
+            }
+        });
+    });
+}
+function colisionBulletPlane() {
+    enemyVector.forEach(enemy => {
+        let bullets = enemy.getBullets();
+        let planeBox = box.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
+        bullets.forEach(bullet => {
+            let bulletBox = box2.copy(bullet.getBoundingBox()).applyMatrix4( bullet.mesh.matrixWorld )
+            if(planeBox.containsBox(bulletBox) || planeBox.intersectsBox(bulletBox)) {
+                enemy.deleteOneBullet(bullet, scene);
+                if(planeClass.isMortal){
+                    planeClass.damage(1);
+                    takeOneHealthBar();
+                }
             }
         });
     });
@@ -306,9 +316,11 @@ function colisionCuraPlane() {
         let planeBox = box3.copy(planeClass.getBoundingBox()).applyMatrix4(planeClass.mesh.matrixWorld);
         let curaBox = box.copy(cura.getBoundingBox()).applyMatrix4(cura.mesh.matrixWorld);
         if(curaBox.containsBox(planeBox) || curaBox.intersectsBox(planeBox)) {
-            planeClass.recover(1);
-            let id = curaVector.indexOf(cura);
-            cura.setIsCaught();
+            if(planeClass.canTakeLife){
+                gainOneHealthBar();
+                planeClass.recover(1);
+                cura.setIsCaught();
+            }
         }
     });
 }
@@ -427,6 +439,7 @@ function keyboardUpdate() {
             cura.setIsCaught();
         });
         planeHolder.position.set(0,16,0);
+        resetHealthBar();
         play = true;
     }
 }
@@ -434,10 +447,40 @@ function keyboardUpdate() {
 
 //********************************************//
 window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
-//********************************************//
-render();
-
 document.getElementById("webgl-output").appendChild(stats.domElement);//Pra mostrar o FPS
+render();
+//********************************************//
+
+
+//********************************************//
+//Gerando viewport da vida
+var vidas = [];
+geometry = new THREE.BoxGeometry(0.75, 1.5, 0.1);
+material = new THREE.MeshLambertMaterial({color:"rgb(0, 165, 0)"});
+for (let i = 0; i < planeClass.vida; i++) {
+    vidas[i] = new THREE.Mesh(geometry, material)
+    vidas[i].position.set(-i*1.1+5, -200, 20);
+    scene.add(vidas[i]);
+    vidas.push(vidas[i]);
+}
+
+function takeOneHealthBar(){
+    if(planeClass.vida >=0)
+    scene.remove(vidas.at(planeClass.vida));
+}
+
+function gainOneHealthBar(){
+        scene.add(vidas.at(planeClass.vida));
+}
+
+function resetHealthBar(){
+    if(planeClass.vida <= 5){
+        planeClass.vida = 5;
+        for(let i = 0; i < planeClass.vida; i++)
+            scene.add(vidas.at(i));
+    }
+}
+//********************************************//
 function controlledRender()
 {
   var width = window.innerWidth;
@@ -446,16 +489,13 @@ function controlledRender()
   // Set main viewport
   renderer.setViewport(0, 0, width, height); // Reset viewport    
   renderer.setScissorTest(false); // Disable scissor to paint the entire window
-//   renderer.setClearColor("rgb(80, 70, 170)");    
-  renderer.clear();   // Clean the window
   renderer.render(scene, camera);   
 
   // Set virtual camera viewport 
-  var offset = 1115; 
-  renderer.setViewport(100, 100, 100, 100);  // Set virtual camera viewport  
-  renderer.setScissor(offset, height-vcHeidth+50, vcHeidth-50, vcHeidth-50); // Set scissor with the same size as the viewport
+  var offset = -90; 
+  renderer.setViewport(offset, height-vcHeidth-offset, vcWidth, vcHeidth);  // Set virtual camera viewport  
+  renderer.setScissor(offset, height-vcHeidth-offset, vcWidth, vcHeidth); // Set scissor with the same size as the viewport
   renderer.setScissorTest(true); // Enable scissor to paint only the scissor are (i.e., the small viewport)
-  renderer.setClearColor( 0xffffff, 0);
   renderer.render(scene, virtualCamera);  // Render scene of the virtual camera
 }
 
@@ -480,9 +520,11 @@ function render() {
         if(element.getPositionZ() > 45) {
             element.deleteAllBullets(scene);
         }
+
         });
 
         colisionBulletEnemy();
+        colisionBulletPlane();
         colisionPlaneEnemy();
         colisionMissileEnemy();
         colisionCuraPlane();
@@ -490,6 +532,7 @@ function render() {
 
         if(planeClass.vida <= 0){
             removePlane();
+            play = false;
         }
     }
 
