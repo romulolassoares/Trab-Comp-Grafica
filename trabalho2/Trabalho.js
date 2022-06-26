@@ -508,8 +508,10 @@ function keyboardUpdate() {
         curaVector.forEach(cura => {
             cura.setIsCaught();
         });
-        planeHolder.position.set(0,16,0);
+        planeClass.obj.position.set(0,16,0);
         planeClass.mesh.position.set(0,16,0);
+        planeClass.obj.scale.set(1,1,1);
+        scene.add(planeClass.obj);
         resetHealthBar();
         clock.elapsedTime = 0;
         console.log(clock.getElapsedTime());
