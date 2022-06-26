@@ -146,10 +146,11 @@ export default class Plane {
    }
 
    deletePlane(scene,planeHolder){
-      scene.remove(this.mesh);
-      scene.remove(this.boundingbox);
-      this.mesh.translateX(-20);
-      this.obj.translateY(-20);
+      // scene.remove(this.mesh);
+      scene.remove(this.obj);
+      // scene.remove(this.boundingbox);
+      // this.mesh.translateX(-20);
+      // this.obj.translateY(-20);
    }
 
    getVida(){
