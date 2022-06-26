@@ -28,17 +28,13 @@ var stats = new Stats(); //Pra ver os status do FPS
 //********************************************//
 // Criando a luz
 var position = new THREE.Vector3(0, 100, 100);
-
-
 var dirLight = new THREE.DirectionalLight("rgb(255,255,255)");
 setDirectionalLighting(position);
-
 function setDirectionalLighting(position) {
     dirLight.position.copy(position);
     dirLight.shadow.mapSize.width = 512;
     dirLight.shadow.mapSize.height = 512;
     dirLight.castShadow = true;
-
     dirLight.shadow.camera.near = .1;
     dirLight.shadow.camera.far = 600;
     dirLight.shadow.camera.left = -110;
@@ -48,23 +44,20 @@ function setDirectionalLighting(position) {
     scene.add(dirLight);
 }
 //********************************************//
-//********************************************//
 //Criando a camera
 var camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300);
 camera.position.set(0, 100, 70);
 camera.lookAt(0, 15, 0);
 scene.add(camera);
-
 var camPosition = new THREE.Vector3( 0, -200, 30 );
 var vcWidth = 400; 
 var vcHeidth = 300; 
 var virtualCamera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 1, 300); 
-  virtualCamera.position.copy(camPosition);
-  scene.add(virtualCamera);
+virtualCamera.position.copy(camPosition);
+scene.add(virtualCamera);
 //********************************************//
 //Criando os planos
 var planos = [];
-
 for (let i = 0; i < 3; i++) {
     planos[i] = createGroundPlaneWired(800.0, 200.0);
     planos[i].position.set(0, 0, i * -100);
@@ -84,7 +77,7 @@ function moverPlanos() {
 //Para usar o Keyboard
 var keyboard = new KeyboardState();
 //********************************************//
-//Criando o avião
+// Carregando os gltfs
 var loader = new GLTFLoader();
 var obj;
 var tecoTecoObj;
@@ -97,14 +90,12 @@ const afterLoadPlane = (object) => {
     planeHolder = planeClass.obj
     play = true;
 };
-
 const afterLoadEnemy = (enemy, object) => {
     let objCopy = new THREE.Object3D().copy(object);
     enemy.setObj(objCopy);
     scene.add(objCopy);
     play = true;
 };
-
 loader.load('./assets/Airplane.glb', function (gltf) {
     obj = gltf.scene;
     obj.position.set(0,46,0);
@@ -117,7 +108,6 @@ loader.load('./assets/Airplane.glb', function (gltf) {
     });
     afterLoadPlane(obj);
 }, onProgress, null);
-
 loader.load('./assets/ToonTank.glb', function (gltf) {
     toonTankObj = gltf.scene;
     toonTankObj.position.set(0,46,0);
@@ -131,7 +121,6 @@ loader.load('./assets/ToonTank.glb', function (gltf) {
     });
     // afterLoadPlane(obj);
 }, onProgress, null);
-
 loader.load('./assets/TecoTeco.glb', function (gltf) {
     tecoTecoObj = gltf.scene;
     tecoTecoObj.position.set(0,46,0);
@@ -144,7 +133,6 @@ loader.load('./assets/TecoTeco.glb', function (gltf) {
         }
     });
 }, onProgress, null);
-
 loader.load('./assets/tieFighter.glb', function (gltf) {
     tieFifhterObj = gltf.scene;
     tieFifhterObj.position.set(0,46,0);
@@ -157,7 +145,6 @@ loader.load('./assets/tieFighter.glb', function (gltf) {
         }
     });
 }, onProgress, null);
-
 loader.load('./assets/AlienPurple.glb', function (gltf) {
     alienPurpleObj = gltf.scene;
     alienPurpleObj.position.set(0,46,0);
@@ -171,66 +158,58 @@ loader.load('./assets/AlienPurple.glb', function (gltf) {
     alienPurpleObj.children.splice(5,1);
     });
 }, onProgress, null);
-
 function onProgress(xhr, model) {
     if (xhr.lengthComputable) {
         var percentComplete = xhr.loaded / xhr.total * 100;
     }
 }
-
+//Criando o avião
 const planeClass = new Plane();
 var planeHolder = new THREE.Object3D();
 scene.add(planeHolder);
 //********************************************//
 var target = new THREE.Vector3();
-
 //********************************************//
 // Criando Adversários
-var play = false;
-var passTime = false;
-var enemyVector = [];
-var groundEnemyVector = [];
-var curaVector = [];
-
+var play = false; // Variável para verificar se o jogo pode começar
+var passTime = false; // Variável para verificar se o tempo de 2 minutos já passou
+var enemyVector = []; // Vetor de inimigos aereos
+var groundEnemyVector = []; // Vetor de inimigos do chão
+var curaVector = []; // Vetor de curas
 // função para limitar quantos inimigos tem na tela
-var cooldownType0 = false;
-var cooldownType1 = true;
-var cooldownType2 = true;
-var cooldownType3 = true;
-var cooldownType4 = true;
-var cooldownType5 = true;
-setTimeout( () => cooldownType1 = false, 5000);
-setTimeout( () => cooldownType2 = false, 8000);
-setTimeout( () => cooldownType3 = false, 10000);
-setTimeout( () => cooldownType4 = false, 30000);
-setTimeout( () => cooldownType5 = false, 6000);
+var cooldownsType = [false, true, true, true, true, true]
+setTimeout( () => cooldownsType[1] = false, 5000);
+setTimeout( () => cooldownsType[2] = false, 8000);
+setTimeout( () => cooldownsType[3] = false, 10000);
+setTimeout( () => cooldownsType[4] = false, 30000);
+setTimeout( () => cooldownsType[5] = false, 6000);
 
 function chamaAdversario() {
-    if(!cooldownType0) {
-        cooldownType0 = true;
-        setTimeout( () => cooldownType0 = false, 10000);
+    if(!cooldownsType[0]) {
+        cooldownsType[0] = true;
+        setTimeout( () => cooldownsType[0] = false, 10000);
         criarAdversario(0);
-    } else if (!cooldownType1) {
-        cooldownType1 = true;
-        setTimeout( () => cooldownType1 = false, 25000);
+    } else if (!cooldownsType[1]) {
+        cooldownsType[1] = true;
+        setTimeout( () => cooldownsType[1] = false, 25000);
         criarAdversario(1);
-    } else if (!cooldownType2) {
-        cooldownType2 = true;
-        setTimeout( () => cooldownType2 = false, 50000);
+    } else if (!cooldownsType[2]) {
+        cooldownsType[2] = true;
+        setTimeout( () => cooldownsType[2] = false, 50000);
         criarAdversario(2);
-    } else if (!cooldownType3) {
-        cooldownType3 = true;
-        setTimeout( () => cooldownType3 = false, 45000);
+    } else if (!cooldownsType[3]) {
+        cooldownsType[3] = true;
+        setTimeout( () => cooldownsType[3] = false, 45000);
         criarAdversario(3);
     }
-    if(!cooldownType4){
-        cooldownType4 = true;
-        setTimeout( () => cooldownType4 = false, 30000);
+    if(!cooldownsType[4]){
+        cooldownsType[4] = true;
+        setTimeout( () => cooldownsType[4] = false, 30000);
         criarAdversarioChao();
     }
-    if(!cooldownType5) {
-        cooldownType5 = true;
-        setTimeout( () => cooldownType5 = false, 10000);
+    if(!cooldownsType[5]) {
+        cooldownsType[5] = true;
+        setTimeout( () => cooldownsType[5] = false, 10000);
         criarCura();
     }
 }
@@ -377,10 +356,7 @@ function colisionCuraPlane() {
         }
     });
 }
-
-/**
- * Para efetuar a animações
- */
+// Funções para efetuar as animações de romoção da tela
 function removePlane(){
     if(planeClass.mesh.scale.x>=0){
         planeClass.mesh.scale.x -=.1;
@@ -392,7 +368,6 @@ function removePlane(){
     scene.remove(planeHolder);
     //Parece que a boudingBox ainda ta na cena
 }
-
 function animation() {
     enemyVector.forEach(enemy => {
         enemy.animation(enemyVector, scene);
@@ -409,8 +384,6 @@ function animation() {
         }
     });
 }
-//********************************************//
-
 //********************************************//
 let cooldownBullet = false;
 let cooldownMissile = false;
@@ -484,14 +457,9 @@ function keyboardUpdate() {
     }
 }
 //********************************************//
-
-//********************************************//
-window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false );
+window.addEventListener( 'resize', function(){onWindowResize(camera, renderer)}, false ); // Resize the screen
 document.getElementById("webgl-output").appendChild(stats.domElement);//Pra mostrar o FPS
 render();
-//********************************************//
-
-
 //********************************************//
 //Gerando viewport da vida
 var vidas = [];
@@ -504,6 +472,7 @@ for (let i = 0; i < planeClass.vida; i++) {
     vidas.push(vidas[i]);
 }
 
+// Criando os elementos de vida
 function criarCura(){
     let cura = new Cura();
     var newpos = Math.floor(Math.random() * 95) + 1;
@@ -514,23 +483,19 @@ function criarCura(){
     scene.add(cura.mesh);
     curaVector.push(cura);
 }
-
 function verticalCura() {
     curaVector.forEach(cura => {
         let id = curaVector.indexOf(cura);
         cura.move(curaVector, id, scene);
     });
 }
-
 function takeOneHealthBar(){
     if(planeClass.vida >=0)
         scene.remove(vidas.at(planeClass.vida));
 }
-
 function gainOneHealthBar(){
     scene.add(vidas.at(planeClass.vida));
 }
-
 function resetHealthBar(){
     if(planeClass.vida <= 5){
         planeClass.vida = 5;
@@ -564,17 +529,13 @@ function render() {
     keyboardUpdate();
     if(play && !passTime){
         moverPlanos();
-
         planeClass.moveBullets();
         planeClass.moveMissiles();
         planeClass.deleteBullets(scene);
         planeClass.deleteMissiles(scene);
-
         verticalCura();
-
         chamaAdversario();
         movimentarAdversario();
-        
         enemyVector.forEach(element => {
             element.createEnemyShoot(scene);
             element.moveBullets(planeHolder);
@@ -582,7 +543,6 @@ function render() {
                 element.deleteAllBullets(scene);
             }
         });    
-
         groundEnemyVector.forEach(element => {
             element.createMissiles(scene);
             element.moveMissiles(planeHolder);
@@ -590,7 +550,6 @@ function render() {
                 element.deleteAllMissiles(scene);
             }
         });
-
         colisionBulletEnemy();
         colisionBulletPlane();
         colisionPlaneEnemy();
@@ -598,13 +557,11 @@ function render() {
         colisionCuraPlane();
         colisionMissilePlane();
         animation();
-
         if(planeClass.vida <= 0){
             removePlane();
             play = false;
         }
     }
-
     if(clock.getElapsedTime() >= 120) {
         console.log("Acabou o jogo");
         passTime = true;
