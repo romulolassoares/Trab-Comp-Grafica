@@ -145,6 +145,7 @@ export default class EnemyAir extends Enemy {
       this.mesh.updateMatrixWorld(true);
       if (this.getPositionZ() >= 70 || this.getPositionX() > 120 || this.getPositionX() < -120) {
          scene.remove(this.mesh);
+         scene.remove(this.obj);
          this.deleteAllBullets(scene);
          enemyVector.splice(id, 1);
       } else {
