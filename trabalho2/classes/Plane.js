@@ -33,8 +33,8 @@ export default class Plane {
       this.missiles = [];
       this.target = new THREE.Vector3();
       this.vida = 5;
-      this.isMortal = false;
-      // this.isMortal = true;
+      // this.isMortal = false;
+      this.isMortal = true;
       // this.canTakeLife = false;
       this.canTakeLife = true;
    }
