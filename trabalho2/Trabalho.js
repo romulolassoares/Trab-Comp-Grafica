@@ -579,6 +579,7 @@ function render() {
         if(planeClass.vida <= 0){
             removePlane();
             play = false;
+            passTime = true;
         }
     }
     if(clock.getElapsedTime() >= 120) {
