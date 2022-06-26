@@ -424,10 +424,14 @@ function animation() {
                 enemy.mesh.scale.x -=.1;
                 enemy.mesh.scale.y -=.1;
                 enemy.mesh.scale.z -=.1;
+                enemy.obj.scale.x -=.1;
+                enemy.obj.scale.y -=.1;
+                enemy.obj.scale.z -=.1;
             }
             if(enemy.mesh.scale.x <= 0) {
                 let idEnemy = groundEnemyVector.indexOf(enemy);
                 scene.remove(enemy.mesh);
+                scene.remove(enemy.obj);
                 groundEnemyVector.splice(idEnemy, 1);
             }
         }
@@ -451,30 +455,30 @@ function keyboardUpdate() {
     var speed = 40;
     var moveDistance = speed * clock.getDelta();
     planeClass.mesh.getWorldPosition(target);
-    if (keyboard.pressed("down")) {
+    if (keyboard.pressed("down") && !passTime) {
         if (target.z <= 45) {
             planeClass.moveDown(moveDistance);
         }
     }
-    if (keyboard.pressed("up")) {
+    if (keyboard.pressed("up") && !passTime) {
         if (target.z >= -150) {
             planeClass.moveUp(moveDistance);
         }
     }
-    if (keyboard.pressed("right")) {
+    if (keyboard.pressed("right") && !passTime) {
         if (target.x <= 95) {
             planeClass.moveRight(moveDistance);
         }
     }
-    if (keyboard.pressed("left")) {
+    if (keyboard.pressed("left") && !passTime) {
         if (target.x >= -95) {
             planeClass.moveLeft(moveDistance);
         }
     }
-    if (keyboard.up("right")) {
+    if (keyboard.up("right") && !passTime) {
         planeClass.obj.rotateX(degreesToRadians(12));
     }
-    if (keyboard.up("left")) {
+    if (keyboard.up("left") && !passTime) {
         planeClass.obj.rotateX(degreesToRadians(-12));
     }
     if (keyboard.down("G")) {
@@ -491,6 +495,7 @@ function keyboardUpdate() {
         setTimeout( () => cooldownMissile = false, 2000);
     }
     if (keyboard.pressed("enter")){
+        console.log("Reseto")
         play = false;
         enemyVector.forEach(enemy => {
             enemy.deleteAllBullets(scene);
@@ -503,9 +508,12 @@ function keyboardUpdate() {
         curaVector.forEach(cura => {
             cura.setIsCaught();
         });
-        planeHolder.position.set(0,0,0);
+        planeHolder.position.set(0,16,0);
         planeClass.mesh.position.set(0,16,0);
         resetHealthBar();
+        clock.elapsedTime = 0;
+        console.log(clock.getElapsedTime());
+        passTime = false;
         play = true;
     }
 }
@@ -587,8 +595,8 @@ function render() {
     stats.update();
     onWindowResize();
     
+    keyboardUpdate();
     if(play && !passTime){
-        keyboardUpdate();
         moverPlanos();
 
         planeClass.moveBullets();
