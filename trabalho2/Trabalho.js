@@ -84,17 +84,20 @@ var tecoTecoObj;
 var tieFifhterObj;
 var alienPurpleObj;
 var toonTankObj;
+var playVector = [false, false, false, false, false];
 const afterLoadPlane = (object) => {
     planeClass.setObj(object);
     scene.add(object);
-    planeHolder = planeClass.obj
-    play = true;
+    planeHolder = planeClass.obj;
+    playVector[0] = true;
+    // play = true;
 };
 const afterLoadEnemy = (enemy, object) => {
-    let objCopy = new THREE.Object3D().copy(object);
+    let objCopy = new THREE.Object3D();
+    objCopy.copy(object);
     enemy.setObj(objCopy);
     scene.add(objCopy);
-    play = true;
+    // play = true;
 };
 loader.load('./assets/Airplane.glb', function (gltf) {
     obj = gltf.scene;
@@ -120,6 +123,7 @@ loader.load('./assets/ToonTank.glb', function (gltf) {
         }
     });
     // afterLoadPlane(obj);
+    playVector[1] = true;
 }, onProgress, null);
 loader.load('./assets/TecoTeco.glb', function (gltf) {
     tecoTecoObj = gltf.scene;
@@ -132,6 +136,7 @@ loader.load('./assets/TecoTeco.glb', function (gltf) {
             child.castShadow = true;
         }
     });
+    playVector[2] = true;
 }, onProgress, null);
 loader.load('./assets/tieFighter.glb', function (gltf) {
     tieFifhterObj = gltf.scene;
@@ -144,6 +149,7 @@ loader.load('./assets/tieFighter.glb', function (gltf) {
             child.castShadow = true;
         }
     });
+    playVector[3] = true;
 }, onProgress, null);
 loader.load('./assets/AlienPurple.glb', function (gltf) {
     alienPurpleObj = gltf.scene;
@@ -156,6 +162,7 @@ loader.load('./assets/AlienPurple.glb', function (gltf) {
             child.castShadow = true;
         }
     alienPurpleObj.children.splice(5,1);
+    playVector[4] = true;
     });
 }, onProgress, null);
 function onProgress(xhr, model) {
@@ -472,6 +479,16 @@ for (let i = 0; i < planeClass.vida; i++) {
     vidas.push(vidas[i]);
 }
 
+function validatePlay() {
+    let count = 0;
+    playVector.forEach(element => {
+        if(element) {
+            count++;
+        }
+    })
+    if(count === playVector.length) play = true;
+}
+
 // Criando os elementos de vida
 function criarCura(){
     let cura = new Cura();
@@ -525,6 +542,8 @@ function controlledRender()
 function render() {
     stats.update();
     onWindowResize();
+
+    if(!play) validatePlay();
     
     keyboardUpdate();
     if(play && !passTime){
