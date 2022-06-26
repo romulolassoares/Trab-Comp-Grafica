@@ -91,7 +91,8 @@ const afterLoadPlane = (object) => {
     play = true;
 };
 const afterLoadEnemy = (enemy, object) => {
-    let objCopy = new THREE.Object3D().copy(object);
+    let objCopy = new THREE.Object3D();
+    objCopy.copy(object);
     enemy.setObj(objCopy);
     scene.add(objCopy);
     play = true;
