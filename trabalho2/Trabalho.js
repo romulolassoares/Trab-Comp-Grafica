@@ -9,7 +9,7 @@ import {
 } from "../libs/util/util.js";
 
 import { default as Plane } from './classes/Plane.js';
-import { default as Enemy } from './classes/Enemy.js';
+import { default as EnemyAir } from './classes/EnemyAir.js';
 import { default as GroundEnemy } from './classes/GroundEnemy.js';
 import { default as Cura } from './classes/Cura.js';
 
@@ -235,7 +235,7 @@ function chamaAdversario() {
     }
 }
 function criarAdversario(type) {
-    let enemy = new Enemy(type);
+    let enemy = new EnemyAir(type);
     if(enemy.moveType === 0) {
         afterLoadEnemy(enemy, tecoTecoObj);
     } else if(enemy.moveType === 1) {
@@ -395,46 +395,10 @@ function removePlane(){
 
 function animation() {
     enemyVector.forEach(enemy => {
-        if(enemy.isDead == true){
-            console.log("dead");
-            enemy.mesh.rotation.y += 0.1;
-            enemy.mesh.rotation.x += 0.1;
-            if(enemy.mesh.scale.x>=0){
-                enemy.mesh.scale.x -=.1;
-                enemy.mesh.scale.y -=.1;
-                enemy.mesh.scale.z -=.1;
-                enemy.obj.scale.x -=.1;
-                enemy.obj.scale.y -=.1;
-                enemy.obj.scale.z -=.1;
-            }
-            if(enemy.mesh.scale.x <= 0) {
-                let idEnemy = enemyVector.indexOf(enemy);
-                scene.remove(enemy.mesh);
-                scene.remove(enemy.obj);
-                enemyVector.splice(idEnemy, 1);
-            }
-        }
-    })
+        enemy.animation(enemyVector, scene);
+    });
     groundEnemyVector.forEach(enemy => {
-        if(enemy.isDead == true){
-            console.log("dead");
-            enemy.mesh.rotation.y += 0.1;
-            enemy.mesh.rotation.x += 0.1;
-            if(enemy.mesh.scale.x>=0){
-                enemy.mesh.scale.x -=.1;
-                enemy.mesh.scale.y -=.1;
-                enemy.mesh.scale.z -=.1;
-                enemy.obj.scale.x -=.1;
-                enemy.obj.scale.y -=.1;
-                enemy.obj.scale.z -=.1;
-            }
-            if(enemy.mesh.scale.x <= 0) {
-                let idEnemy = groundEnemyVector.indexOf(enemy);
-                scene.remove(enemy.mesh);
-                scene.remove(enemy.obj);
-                groundEnemyVector.splice(idEnemy, 1);
-            }
-        }
+        enemy.animation(groundEnemyVector, scene);
     })
     curaVector.forEach(cura => {
         if(cura.isCaught)

@@ -1,70 +1,29 @@
 import * as THREE from 'three';
-import { default as Bullet } from './Bullet.js';
+import { degreesToRadians } from "../../libs/util/util.js";
+import { default as Enemy } from './Enemy.js'
 import { default as GroundMissile } from './GroundMissile.js';
-import {
-   onWindowResize,
-   degreesToRadians,
-   createGroundPlane
-} from "../../libs/util/util.js";
 
-export default class Plane {
+export default class GroundEnemy extends Enemy {
    // Private
    #geometry = new THREE.SphereGeometry( 7, 32, 16 );
    #material = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
    // Public
-   mesh;
-   obj;
-   boundingBox = new THREE.Box3();
-   velocity;
-   isDead;
-   isShooting;
    missiles;
    missileCooldown;
-   canShoot;
-   target;
 
    constructor() {
-      this.mesh = new THREE.Mesh(this.#geometry, this.#material);
-      this.mesh.geometry.computeBoundingBox();
-      this.mesh.material.transparent = true;
-      this.mesh.material.opacity = 0;
-      // this.mesh.position.set(newpos,10,-200);
-      this.boundingBox.copy(this.mesh.geometry.boundingBox).applyMatrix4(this.mesh.matrixWorld);
-      this.isDead = false;
-      this.isShooting = true;
+      const geometry = new THREE.SphereGeometry( 7, 32, 16 );
+      const material = new THREE.MeshLambertMaterial({color:"rgb(120, 165, 30)"});
+      super(geometry, material);
       this.missiles = [];
       this.missileCooldown = false;
-      this.canShoot = true;
-      this.target = new THREE.Vector3();
-      this.mesh.castShadow = true;
-      this.mesh.receiveShadow = true;
-   }
-
-   setObj(obj) {
-      this.obj = obj;
-      this.obj.castShadow = true;
-      // this.obj.rotateY(degreesToRadians(-90));
+      // this.mesh.castShadow = true;
+      // this.mesh.receiveShadow = true;
    }
 
    setPosition(newpos) {
       this.mesh.position.set(newpos,6,-200);
       this.obj.position.set(newpos,6,-200);
-   }
-
-   setVelocity(vel) {
-      this.velocity = vel;
-   }
-
-   getPositionZ() {
-      return this.mesh.position.z;
-   }
-
-   getPositionX() {
-      return this.mesh.position.x;
-   }
-
-   getBoundingBox() {
-      return this.boundingBox;
    }
 
    setIsDead(scene) {
@@ -74,7 +33,7 @@ export default class Plane {
    }
 
    createMissiles(scene) {
-      if(!this.missileCooldown) {
+      if(!this.missileCooldown && this.canShoot) {
          let missile = new GroundMissile();
          this.mesh.getWorldPosition(this.target);
          missile.setPosition(this.target);
@@ -106,6 +65,7 @@ export default class Plane {
    }
 
    deleteAllMissiles(scene) {
+      this.canShoot = false;
       let array = this.missiles;
       array.forEach(element => {
          scene.remove(element.mesh);
