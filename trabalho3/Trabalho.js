@@ -12,6 +12,7 @@ import { default as Plane } from './classes/Plane.js';
 import { default as EnemyAir } from './classes/EnemyAir.js';
 import { default as GroundEnemy } from './classes/GroundEnemy.js';
 import { default as Cura } from './classes/Cura.js';
+import { Water } from './external/Water2.js';
 
 var scene = new THREE.Scene();    // Create main scene
 
@@ -21,6 +22,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.VSMShadowMap; // default
 renderer.autoClear = false;
+const textureLoader = new THREE.TextureLoader();
 
 var clock = new THREE.Clock();
 clock.start();
@@ -57,6 +59,19 @@ virtualCamera.position.copy(camPosition);
 scene.add(virtualCamera);
 //********************************************//
 
+// const loadingManager = new THREE.LoadingManager( () => {
+//     let loadingScreen = document.getElementById( 'loading-screen' );
+//     loadingScreen.transition = 0;
+//     loadingScreen.style.setProperty('--speed1', '0');  
+//     loadingScreen.style.setProperty('--speed2', '0');  
+//     loadingScreen.style.setProperty('--speed3', '0');      
+  
+//     let button  = document.getElementById("myBtn")
+//     button.style.backgroundColor = 'Red';
+//     button.innerHTML = 'Click to Enter';
+//     button.addEventListener("click", onButtonPressed);
+//   });
+
 
 //********************************************//
 //********************************************//
@@ -77,6 +92,56 @@ function moverPlanos() {
         }
     });
 }
+
+const waterGeometry = new THREE.PlaneGeometry(300, 400);
+const flowMap = textureLoader.load( 'textures/water/Water_1_M_Flow.jpg' );
+
+let water = new Water( waterGeometry, {
+    scale: 2,
+    textureWidth: 1024,
+    textureHeight: 1024,
+    flowMap: flowMap
+} );
+
+water.position.y = 1;
+water.rotation.x = Math.PI * - 0.5;
+scene.add( water );
+
+const geometryPlane = new THREE.PlaneGeometry( 200, 700 );
+const materialPlane = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
+const plane = new THREE.Mesh( geometryPlane, materialPlane );
+// plane.position.set(1, 2, 2);
+// plane.rotateX(degreesToRadians(90))
+// scene.add( plane );
+var grass = textureLoader.load('./textures/grass.jpg');
+
+var planoRight =  new THREE.Mesh( geometryPlane, materialPlane );
+planoRight.position.set(170, 2, 2);
+planoRight.rotateX(degreesToRadians(90))
+planoRight.material.map = grass;
+scene.add( planoRight );
+
+var planoLeft =  new THREE.Mesh( geometryPlane, materialPlane );
+planoLeft.position.set(-170, 2, 2);
+planoLeft.rotateX(degreesToRadians(90))
+
+scene.add( planoLeft );
+
+// Set defaults
+var repeatFactor = 2;
+var wrapModeS  = THREE.RepeatWrapping;
+var wrapModeT  = THREE.RepeatWrapping;
+var minFilter = THREE.LinearFilter;
+var magFilter = THREE.LinearFilter;
+// updateTexture(true);
+planoRight.material.map.wrapS = wrapModeS;
+planoRight.material.map.wrapT = wrapModeT;
+planoRight.material.map.minFilter = minFilter;
+planoRight.material.map.magFilter = magFilter;
+planoRight.material.map.repeat.set(repeatFactor,repeatFactor); 
+
+
+
 //********************************************//
 //Para usar o Keyboard
 var keyboard = new KeyboardState();
