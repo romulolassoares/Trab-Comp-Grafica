@@ -59,19 +59,36 @@ virtualCamera.position.copy(camPosition);
 scene.add(virtualCamera);
 //********************************************//
 
-// const loadingManager = new THREE.LoadingManager( () => {
-//     let loadingScreen = document.getElementById( 'loading-screen' );
-//     loadingScreen.transition = 0;
-//     loadingScreen.style.setProperty('--speed1', '0');  
-//     loadingScreen.style.setProperty('--speed2', '0');  
-//     loadingScreen.style.setProperty('--speed3', '0');      
+const loadingManager = new THREE.LoadingManager( () => {
+    let loadingScreen = document.getElementById( 'loading-screen' );
+    loadingScreen.transition = 0;
+    loadingScreen.style.setProperty('--speed1', '0');  
+    loadingScreen.style.setProperty('--speed2', '0');  
+    loadingScreen.style.setProperty('--speed3', '0');      
   
-//     let button  = document.getElementById("myBtn")
-//     button.style.backgroundColor = 'Red';
-//     button.innerHTML = 'Click to Enter';
-//     button.addEventListener("click", onButtonPressed);
-//   });
+    let button  = document.getElementById("myBtn")
+    button.style.backgroundColor = 'Red';
+    button.innerHTML = 'Click to Enter';
+    button.addEventListener("click", onButtonPressed);
+  });
 
+function onButtonPressed() {
+    const loadingScreen = document.getElementById( 'loading-screen' );
+    loadingScreen.transition = 0;
+    loadingScreen.classList.add( 'fade-out' );
+    loadingScreen.addEventListener( 'transitionend', (e) => {
+      const element = e.target;
+      element.remove();  
+    });  
+    play = true
+    // Config and play the loaded audio
+    // let sound = new THREE.Audio( new THREE.AudioListener() );
+    // audioLoader.load( audioPath, function( buffer ) {
+    //   sound.setBuffer( buffer );
+    //   sound.setLoop( true );
+    //   sound.play(); 
+    // });
+  }
 
 //********************************************//
 //********************************************//
@@ -147,7 +164,7 @@ planoRight.material.map.repeat.set(repeatFactor,repeatFactor);
 var keyboard = new KeyboardState();
 //********************************************//
 // Carregando os gltfs
-var loader = new GLTFLoader();
+var loader = new GLTFLoader(loadingManager);
 var obj;
 var tecoTecoObj;
 var tieFifhterObj;
@@ -234,6 +251,17 @@ loader.load('./assets/AlienPurple.glb', function (gltf) {
     playVector[4] = true;
     });
 }, onProgress, null);
+
+// loadGLTFObject(loadingManager, '../assets/objects/r2d2/scene.gltf');
+function loadGLTFObject(manager, object)
+{
+  var loader = new GLTFLoader( manager );
+  loader.load( object, function ( gltf ) {
+    r2d2 = gltf.scene;
+    scene.add ( r2d2 );
+    }, null, null);
+}
+
 function onProgress(xhr, model) {
     if (xhr.lengthComputable) {
         var percentComplete = xhr.loaded / xhr.total * 100;
@@ -566,7 +594,7 @@ function validatePlay() {
             count++;
         }
     })
-    if(count === playVector.length && !pause) play = true;
+    // if(count === playVector.length && !pause) play = true;
 }
 
 // Criando os elementos de vida
