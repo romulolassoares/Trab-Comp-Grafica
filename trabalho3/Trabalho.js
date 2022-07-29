@@ -253,14 +253,6 @@ loader.load('./assets/AlienPurple.glb', function (gltf) {
 }, onProgress, null);
 
 // loadGLTFObject(loadingManager, '../assets/objects/r2d2/scene.gltf');
-function loadGLTFObject(manager, object)
-{
-  var loader = new GLTFLoader( manager );
-  loader.load( object, function ( gltf ) {
-    r2d2 = gltf.scene;
-    scene.add ( r2d2 );
-    }, null, null);
-}
 
 function onProgress(xhr, model) {
     if (xhr.lengthComputable) {
