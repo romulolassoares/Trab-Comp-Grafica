@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import Stats from "../build/jsm/libs/stats.module.js";
-import { GLTFLoader } from "./build/jsm/loaders/GLTFLoader.js";
+import { GLTFLoader } from "../build/jsm/loaders/GLTFLoader.js";
 import KeyboardState from "../libs/util/KeyboardState.js";
 import { OrbitControls } from "../build/jsm/controls/OrbitControls.js";
 import {
