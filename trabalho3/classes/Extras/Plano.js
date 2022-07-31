@@ -21,17 +21,18 @@ export default class Plano{
    geometryPlaneSand = new THREE.PlaneGeometry( 800, 200 );
    materialPlaneSand = new THREE.MeshBasicMaterial( {color: "rgb(255,255,255)", side: THREE.DoubleSide} );
 
-   geometryPlane = new THREE.PlaneGeometry( 200, 700 );
+   geometryPlane = new THREE.PlaneGeometry( 200, 1000 );
    materialPlane = new THREE.MeshBasicMaterial( {color: 0xffff00, side: THREE.DoubleSide} );
 
-   geometryPlaneGround = new THREE.PlaneGeometry( 20, 700 );
+   geometryPlaneGround = new THREE.PlaneGeometry( 20, 1000 );
    materialPlaneGround = new THREE.MeshBasicMaterial( {color: "rgb(255,255,255)", side: THREE.DoubleSide} );
 
-   waterGeometry = new THREE.PlaneGeometry(300, 400);
+   waterGeometry = new THREE.PlaneGeometry(300, 1000);
    flowMap = this.textureLoader.load('./textures/water/Water_1_M_Flow.jpg');
    water;
 
    planos = [];
+   planoBase;
 
    constructor(scene) {
       for (let i = 0; i < 3; i++) {
@@ -54,6 +55,12 @@ export default class Plano{
       this.water.position.y = 3;
       this.water.rotation.x = Math.PI * - 0.5;
       scene.add(this.water);
+
+      this.planoBase =  new THREE.Mesh( this.geometryPlane, this.materialPlaneSand );
+      this.planoBase.position.set(0, 0, -760);
+      this.planoBase.rotateX(degreesToRadians(-90))
+      scene.add( this.planoBase );
+
 
       this.configMap(this.materialPlane, this.grass);
 
